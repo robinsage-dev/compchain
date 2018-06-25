@@ -1,0 +1,28 @@
+{
+  "version": "1.0.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "scripts": {
+    "start": "node app.js",
+    "test": "mocha"
+  },
+  "dependencies": {
+    "@robinsage/rb-aws": "0.2.9",
+    "@robinsage/rb-mongo": "0.2.26",
+    "@robinsage/rb-redis": "0.2.2",
+    "@robinsage/robinbase": "0.2.67",
+    "create-hash": "^1.2.0",
+    "create-hmac": "^1.1.7",
+    "dotenv": "4.0.x",
+    "ecurve": "^1.0.6",
+    "express": "4.13.4",
+    "randombytes": "^2.0.6",
+    "safe-buffer": "^5.1.2",
+    "secp256k1": "^3.5.0"
+  },
+  "devDependencies": {
+    "chai": "^4.1.2",
+    "chai-bytes": "^0.1.1",
+    "mocha": "^5.2.0"
+  }
+}

@@ -1,0 +1,41 @@
+<p>The pattern is quite simple. You give a source file name and a set of transformations to the image transformer, and it will return you the transformed image after file caching it on the temp folder.</p>
+
+<pre class="prettyprint">
+    
+    var <a href="ImageTransformer.html">ImageTransformer</a> = require('image-transform');
+
+    var transformer = new <a href="ImageTransformer.html">ImageTransformer</a>({
+        path: './tmp/' // the temp folder path to be used as file cache
+    });
+
+    var transformations = [{
+        type : "crop",
+        options : {
+            x : 74,
+            y : 37,
+            width : 352,
+            height : 552
+        }
+    }, {
+        type : "stretch",
+        options : {
+            width : 350,
+            height : 350
+        }
+    }, {
+        type : "fit",
+        options : {
+            width : 200,
+            height : 200
+        }
+    }];
+
+    transformer.<a href="ImageTransformer.html#transform">transform</a>('./image.jpg', transformations, function(err, info, image) {
+        if(err)
+            throw err;
+            
+        console.log('info', info); // some file info
+        console.log('image', image); // the file stream
+    });
+        
+</pre>

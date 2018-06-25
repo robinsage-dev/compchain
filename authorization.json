@@ -1,0 +1,16 @@
+{
+  "policies": {
+    "deny_all": {
+      "name": "Deny All",
+      "type": "Deny"
+    }
+  },
+  "roles": [
+    {
+      "name": "Super Admin",
+      "policies": [
+
+      ]
+    }
+  ]
+}
