@@ -1,5 +1,6 @@
 const Debug = require_robinbase('/helpers/Debug.js').prefix('model:Block');
 const Schema = require_robinbase('/helpers/Schema.js');
+const transaction = require('../service/util/transaction.js');
 
 /**
  * Model Block
@@ -22,7 +23,20 @@ Block.storageName = 'mongo';
 
 Block.schema = new Schema('_id', {
     _id: Schema.objectid,
-    // add additional properties here
+    hash: Schema.string,
+    prevBlockHash: Schema.string,
+    merkleRoot: Schema.string,
+    difficultyTarget: Schema.integer,
+    nonce: Schema.integer,
+    transactions: Schema.array.of(Schema.object.of({
+        senderPubKey: Schema.string,
+        receiverPubKey: Schema.string,
+        sig: Schema.string,
+        inputs: Schema.array.of(Schema.object.of({
+            hash: Schema.string
+        })),
+        amount: Schema.integer
+    })),
     createdTime: Schema.datetime,
     modifiedTime: Schema.datetime,
 });

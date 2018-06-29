@@ -1,7 +1,7 @@
 const Debug = require_robinbase('/helpers/Debug.js').prefix('model:Event');
 const Schema = require_robinbase('/helpers/Schema.js');
-const Transaction = require('../services/util/transactions.js');
-const Handshake = require('../services/util/handshake.js');
+const Transaction = require('../service/util/transaction.js');
+const Handshake = require('../service/util/handshake.js');
 
 /**
  * Model Event

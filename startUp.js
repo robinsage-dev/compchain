@@ -9,7 +9,7 @@ function startApi(Config, App)
 {
     if (Config.RB_API == 1) //API
     {
-        const ApiApp = require_robinbase('/services/api/apiApp.js');
+        const ApiApp = require_robinbase('/service/api/apiApp.js');
         const baseRouter = App.buildAdminRouter();
         const customRouters = [
             // add custom routers here
@@ -24,7 +24,7 @@ function startWebsite(Config, App)
 {
     if (Config.RB_WEBSITE == 1) //WEBSITE
     {
-        const WebsiteApp = require_robinbase('/services/website/websiteApp.js');
+        const WebsiteApp = require_robinbase('/service/website/websiteApp.js');
         const websiteApp =  new WebsiteApp();
         websiteApp.init(null, Config.RB_WEB_PORT, null, [require('./routes/websiteRoutes.js')]);
     }
@@ -34,7 +34,7 @@ function startAdmin(Config, App)
 {
     if (Config.RB_ADMIN == 1) //ADMIN
     {
-        const WebsiteApp = require_robinbase('/services/website/websiteApp.js');
+        const WebsiteApp = require_robinbase('/service/website/websiteApp.js');
         const adminApp =  new WebsiteApp();
         const baseRouter = App.buildAdminRouter();
         const customRouters = [

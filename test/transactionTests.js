@@ -2,8 +2,8 @@ const expect = require('chai')
   .use(require('chai-bytes'))
   .expect;
 
-const Transaction = require('../services/util/transaction.js');
-const EcPair = require('../services/util/ecpair.js');
+const Transaction = require('../service/util/transaction.js');
+const EcPair = require('../service/util/ecpair.js');
 const fixture = require('./fixtures/cryptography.json');
 
 describe('getTransactionHash()', function () {

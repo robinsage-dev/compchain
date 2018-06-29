@@ -2,7 +2,7 @@ const expect = require('chai')
     .use(require('chai-bytes'))
     .expect;
 
-const EcPair = require('../services/util/ecpair.js');
+const EcPair = require('../service/util/ecpair.js');
 const fixture = require('./fixtures/cryptography.json');
 
 describe('makeRandom()', function () {
