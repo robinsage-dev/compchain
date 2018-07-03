@@ -1,35 +1,15 @@
 const bcrypto = require('../util/crypto.js');
 const ecdsa = require('../util/ecdsa.js');
+const ECSignature = require('../util/ecsignature');
 
 // Transaction
 // =============================================================================
 
 const mongoose = require('mongoose');
-
-// Object Model
-// =============================================================================
-
-function Transaction(senderPubKey, receiverPubKey, sig, amount) {
-    // typeforce(
-    //     types.tuple(
-    //         types.Buffer,
-    //         types.Buffer,
-    //         types.Buffer,
-    //         types.Satoshi
-    //     ),
-    //     arguments
-    // )
-    this.senderPubKey = senderPubKey;
-    this.receiverPubKey = receiverPubKey;
-    this.sig = sig;
-    this.inputs = [];
-    this.amount = amount;
-}
-
-// Mongodb Schema
-// =============================================================================
-
 const Schema = mongoose.Schema;
+
+// Mongodb Object Model
+// =============================================================================
 
 let TransactionSchema = new Schema({
     _id: {
@@ -37,129 +17,147 @@ let TransactionSchema = new Schema({
         required: true
     },
     hash: {
-        type: String,
-        // validate: Transaction.validateTransactionHash,
+        type: Buffer,
         required: true
     },
     senderPubKey: {
-        type: String,
+        type: Object,
         required: true
     },
     receiverPubKey: {
-        type: String,
+        type: Object,
         required: true
     },
     sig: {
-        type: String,
+        type: Object,
         required: true
     },
     inputs: {
-        type: [String], // Hash of input tx
+        type: [Buffer], // Hash of input tx
         required: true
     },
     amount: {
         type: Number,
         required: true
     }
-})
+});
 
-// Methods
+// Transaction Class
 // =============================================================================
+class TransactionClass {
 
-Transaction.prototype.addInput = function (hash) {
-    // typeforce(types.tuple(
-    //     types.Hash256bit,
-    // ), arguments)
+    // Virtual object Properties
+    // =============================================================================
 
-    // Add the input and return the input's index
-    return (
-        this.inputs.push({
-            hash: hash
-        })
-    )
-}
+    // Methods
+    // =============================================================================
 
-Transaction.prototype.validateTransactionSig = function () {
-    let valid = true;
-    valid = ecdsa.verify(this.getTransactionHash(), this.sig, this.senderPubKey);
-    return valid;
-}
-
-Transaction.prototype.validateTransactionData = function () {
-    let valid = true;
-    // TODO: Check that outputs >= inputs
-    return valid;
-}
-
-Transaction.prototype.signTransaction = function (privateKey) {
-    let success = true;
-    try {
-        this.sig = ecdsa.sign(this.getTransactionHash(), privateKey);
-    } catch(err) {
-        if (err) {
-            throw new Error('signTransaction Error: ' + err);
-            return;
-        }
+    validateTransactionSig() {
+        let valid = true;
+        valid = ecdsa.verify(this.hash, this.sig, this.senderPubKey);
+        return valid;
     }
-    return success;
-}
 
-Transaction.prototype.__byteLength = function () {
-    return (
-        (4) +                     // senderPubKey
-        (4) +                     // receiverPubKey
-        (4) +                     // sig
-        (this.inputs.length) +
-        this.inputs.reduce(function (sum, input) { return sum + 16 + 32 }, 0) +
-        (4)                       // amount
-    )
-}
+    validateTransactionData() {
+        let valid = true;
+        // TODO: Check that outputs >= inputs
+        return valid;
+    }
 
-Transaction.prototype.__toBuffer = function (buffer, initialOffset) {
-    if (!buffer) buffer = Buffer.allocUnsafe(this.__byteLength());
+    signTransaction(privateKey) {
+        let success = true;
+        try {
+            this.sig = ecdsa.sign(this.hash, privateKey);
+        } catch (err) {
+            if (err) {
+                throw new Error('signTransaction ecdsa.sign Error: ' + err);
+                return;
+            }
+        }
+        return success;
+    }
 
-    var offset = initialOffset || 0;
-    function writeSlice(slice) { offset += slice.copy(buffer, offset); }
-    function writeUInt8(i) { offset = buffer.writeUInt8(i, offset); }
-    function writeUInt32(i) { offset = buffer.writeUInt32LE(i, offset); }
-    function writeInt32(i) { offset = buffer.writeInt32LE(i, offset); }
-    function writeUInt64(i) { offset = bufferutils.writeUInt64LE(buffer, i, offset); }
-    // function writeVarInt(i) {
-    //     varuint.encode(i, buffer, offset);
-    //     offset += varuint.encode.bytes;
-    // }
-    // function writeVarSlice(slice) { writeVarInt(slice.length); writeSlice(slice); }
-    // function writeVector(vector) { writeVarInt(vector.length); vector.forEach(writeVarSlice); }
+    __byteLength() {
+        return (
+            (4) +                     // senderPubKey
+            (4) +                     // receiverPubKey
+            (4) +                     // sig
+            (this.inputs.length) +
+            this.inputs.reduce(function (sum, input) { return sum + 16 + 32; }, 0) +
+            (4)                       // amount
+        );
+    }
 
-    writeInt32(this.senderPubKey);
-    writeInt32(this.receiverPubKey);
-    writeInt32(this.sig);
+    __toBuffer(buffer, initialOffset) {
+        if (!buffer) buffer = Buffer.allocUnsafe(this.__byteLength(this));
 
-    this.inputs.forEach(function (txIn) {
-        writeSlice(txIn.hash);
+        let offset = initialOffset || 0;
+        function writeSlice(slice) {
+            offset += slice.copy(buffer, offset);
+        }
+        function writeUInt8(i) {
+            offset = buffer.writeUInt8(i, offset);
+        }
+        function writeUInt32(i) {
+            offset = buffer.writeUInt32LE(i, offset);
+        }
+        function writeInt32(i) {
+            offset = buffer.writeInt32LE(i, offset);
+        }
+        function writeUInt64(i) {
+            offset = bufferutils.writeUInt64LE(buffer, i, offset);
+        }
+        function writeVarInt(i) {
+            varuint.encode(i, buffer, offset);
+            offset += varuint.encode.bytes;
+        }
+        function writeVarSlice(slice) { writeVarInt(slice.length); writeSlice(slice); }
+        function writeVector(vector) { writeVarInt(vector.length); vector.forEach(writeVarSlice); }
+
         writeInt32(this.senderPubKey);
         writeInt32(this.receiverPubKey);
         writeInt32(this.sig);
+
+        this.inputs.forEach(function (txIn) {
+            writeSlice(txIn.hash);
+            writeInt32(this.senderPubKey);
+            writeInt32(this.receiverPubKey);
+            writeInt32(this.sig);
+            writeInt32(this.amount);
+        });
+
         writeInt32(this.amount);
-    })
 
-    writeInt32(this.amount);
+        // avoid slicing unless necessary
+        if (initialOffset !== undefined)
+            return buffer.slice(initialOffset, offset);
+        return buffer;
+    }
 
-    // avoid slicing unless necessary
-    if (initialOffset !== undefined) return buffer.slice(initialOffset, offset);
-    return buffer;
+    validateTransactionHash() {
+        return true;
+    }
+    
+    calculateTransactionHash() {
+        this.hash = bcrypto.hash256(this.__toBuffer(undefined, undefined));
+    }
 }
 
-Transaction.prototype.getTransactionHash = function () {
-    return bcrypto.hash256(this.__toBuffer(undefined, undefined));
-}
+TransactionSchema.pre('validate', (next) => {
+    if (!this.validateTransactionSig())
+        this.invalidate('sig', new Error('Invalid transaction signature'));
+    this.validateTransactionData();
+    next();
+});
 
-Transaction.prototype.validateTransactionHash = function () {
-    return true;
-}
+TransactionSchema.pre('save', (next) => {
+    this.calculateTransactionHash();
+    next();
+});
+  
+TransactionSchema.loadClass(TransactionClass);
 
 // Module Exports
 // =============================================================================
 
 module.exports = mongoose.model('Transaction', TransactionSchema);
-module.exports = Transaction;

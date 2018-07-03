@@ -1,8 +1,8 @@
 const ecurve = require('ecurve');
 const randomBytes = require('randombytes');
 const BigInteger = require('bigi');
-var ecdsa = require('./ecdsa');
-const secp256k1 = ecdsa.__curve
+let ecdsa = require('./ecdsa');
+const secp256k1 = ecdsa.__curve;
 
 function ECPair(d, Q, options) {
     // if (options) {
@@ -38,22 +38,22 @@ Object.defineProperty(ECPair.prototype, 'Q', {
 
         return this.__Q;
     }
-})
+});
 
 ECPair.makeRandom = function (options) {
-    options = options || {}
+    options = options || {};
 
     let randNumGen = options.rng || randomBytes;
 
-    let d
+    let d;
     do {
         let buffer = randNumGen(32);
         // typeforce(types.Buffer256bit, buffer)
         d = BigInteger.fromBuffer(buffer);
-    } while (d.signum() <= 0 || d.compareTo(secp256k1.n) >= 0)
+    } while (d.signum() <= 0 || d.compareTo(secp256k1.n) >= 0);
 
     return new ECPair(d, null, options);
-}
+};
 
 ECPair.fromBuffer = function (buff, options) {
     options = options || {};
@@ -61,14 +61,14 @@ ECPair.fromBuffer = function (buff, options) {
     let d = BigInteger.fromBuffer(buff);
     if (!(d.signum() <= 0 || d.compareTo(secp256k1.n) >= 0)) {
         return new ECPair(d, null, options);
-    } else {
-        throw new Error("The buffer does not meet standards, try again");
-        return;
-    }
-}
+    } 
+    throw new Error('The buffer does not meet standards, try again');
+    return;
+    
+};
 
 ECPair.prototype.getPublicKeyBuffer = function () {
-    return this.Q.getEncoded(this.compressed)
-}
+    return this.Q.getEncoded(this.compressed);
+};
 
-module.exports = ECPair
+module.exports = ECPair;

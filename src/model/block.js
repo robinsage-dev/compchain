@@ -37,6 +37,6 @@ let BlockSchema = new Schema({
         validate: validation.validateTransactions,
         required: true
     }
-})
+});
 
 module.exports = mongoose.model('Block', BlockSchema);

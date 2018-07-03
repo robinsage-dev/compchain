@@ -6,9 +6,9 @@
   "scripts": {
     "test": "mocha",
     "babel-node": "babel-node",
-    "start": "nodemon --exec npm run babel-node -- src/main.js",
-    "build": "babel src -d dist",
-    "lint": "eslint src test"
+    "start": "npm run build && nodemon --exec npm run babel-node -- dist/main.js",
+    "build": "npm run lint && npm run test && babel src -d dist",
+    "lint": "eslint src test --fix"
   },
   "author": "Robinsage",
   "license": "ISC",
@@ -27,6 +27,7 @@
   "devDependencies": {
     "@babel/core": "^7.0.0-beta.51",
     "@babel/node": "^7.0.0-beta.51",
+    "babel-cli": "^6.26.0",
     "eslint": "^5.0.1",
     "mocha": "^5.2.0",
     "nodemon": "^1.17.5"
