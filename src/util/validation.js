@@ -1,3 +1,5 @@
+const Transaction = require('../model/transaction');
+
 validateBlockHash = function (block) {
     // TODO: hash the block and verify
     return true;
@@ -24,6 +26,13 @@ validateTransactions = function (block) {
     // TODO: validate transaction inputs
     // TODO: validate transaction outputs
     // TODO: validate transaction signatures
+    for (let transaction of block.transactions) {
+        let sigValid = transaction.validateTransactionSig();
+        if (!sigValid) {
+            console.error(new Error("Transaction signature invalid: " + JSON.stringify(transaction, null, 2)));
+            return false;
+        }
+    }
     return true;
 }
 
