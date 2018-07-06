@@ -1,4 +1,4 @@
-let createHash = require('create-hash');
+const createHash = require('create-hash');
 
 function ripemd160(buffer) {
     return createHash('rmd160').update(buffer).digest();

@@ -1,131 +1,127 @@
-const expect = require('chai')
-    .use(require('chai-bytes'))
-    .expect;
-
+const expect = require('chai').use(require('chai-bytes')).expect;
 const Transaction = require('../src/model/transaction.js');
 const EcPair = require('../src/util/ecpair.js');
-const fixture = require('./fixtures/cryptography.json');
+const cryptoFixture = require('./fixtures/cryptography.json');
+const transactionFixture = require('./fixtures/transaction.json');
 
-describe('getTransactionHash()', function () {
-    it('should return a hash', function () {
+// Methods
+// =============================================================================
 
+// TODO: refactor to a helpers.js file
+let loadTransactionFixture = (idx) => {    
+    let transaction = new Transaction();
+    transaction.senderPubKey = Buffer.from(cryptoFixture.valid[transactionFixture[idx].senderPubKeyIdx].publicKey, 'hex');
+    transaction.receiverPubKey = Buffer.from(cryptoFixture.valid[transactionFixture[idx].receiverPubKeyIdx].publicKey, 'hex');
+    transaction.amount = transactionFixture[idx].amount;
+    for (let tx of transactionFixture[idx].inputs) {
+        transaction.inputs.push(Buffer.from(tx, 'hex'));
+    }
+    return transaction;
+};
+
+let loadECPairFixture = (idx) => {    
+    let testPairD = Buffer.from(cryptoFixture.valid[idx].privateKey, 'hex');
+    return EcPair.fromBuffer(testPairD);
+};
+
+// Tests
+// =============================================================================
+
+// TODO: Add failure mode tests
+describe('transactionTests: __byteLength()', () => {
+    it('returned expected length in bytes', () => {
         // 1. ARRANGE
-        // FIXME: use a tested test fixture (typ)
-        let transaction = new Transaction();
-        transaction.senderPubKey = Buffer.alloc(32);
-        transaction.receiverPubKey = Buffer.alloc(32);
-        transaction.sig = Buffer.alloc(32);
-        transaction.amount = 1;
-
-        // 2. ACT
-        transaction.calculateTransactionHash();
-
-        // 3. ASSERT
-        expect(transaction.hash).to.equalBytes('253f208b6954a8b3950809655b387fd61c2ac53b5298816ecd216fa85ad7753f');
-
-    });
-});
-
-describe('__byteLength()', function () {  
-    it('should return a buffer', function () {
-
-        // 1. ARRANGE
-        let transaction = new Transaction();
-        transaction.senderPubKey = Buffer.alloc(32);
-        transaction.receiverPubKey = Buffer.alloc(32);
-        transaction.sig = Buffer.alloc(32);
-        transaction.amount = 1;
+        let transaction = loadTransactionFixture(0);
 
         // 2. ACT
         let length = transaction.__byteLength();
 
         // 3. ASSERT
-        expect(length).to.be.equal(16);
+        expect(length).to.be.equal(transactionFixture[0].byteLength);
     });
 });
 
-describe('__toBuffer()', function () {
-    it('should return a buffer', function () {
-
+describe('transactionTests: __toBuffer()', () => {
+    it('returned the expected buffer', () => {
         // 1. ARRANGE
-        let transaction = new Transaction();
-        transaction.senderPubKey = Buffer.alloc(32);
-        transaction.receiverPubKey = Buffer.alloc(32);
-        transaction.sig = Buffer.alloc(32);
-        transaction.amount = 1;
+        let transaction = loadTransactionFixture(0);
 
         // 2. ACT
         let buffer = transaction.__toBuffer();
 
         // 3. ASSERT
-        expect(buffer).to.equalBytes('00000000000000000000000001000000');
-
+        expect(buffer).to.equalBytes(transactionFixture[0].buffer);
     });
 });
 
-describe('signTransaction()', function () {
-    it('should return true', function () {
-
+describe('transactionTests: getTransactionHash()', () => {
+    it('returned the expected hash', () => {
         // 1. ARRANGE
-        let transaction = new Transaction();
-        let testPairD = Buffer.from(fixture.valid.privateKey, 'hex');
-        let testPair = EcPair.fromBuffer(testPairD);
-        transaction.senderPubKey = testPair.Q;
-        transaction.receiverPubKey = Buffer.alloc(32);
-        transaction.sig = Buffer.alloc(32);
-        transaction.amount = 1;
+        let transaction = loadTransactionFixture(0);
 
         // 2. ACT
         transaction.calculateTransactionHash();
+
+        // 3. ASSERT
+        expect(transaction.hash).to.equalBytes(
+            transactionFixture[0].hash
+        );
+    });
+});
+
+describe('transactionTests: signTransaction()', () => {
+    it('returned the expected signature', () => {
+        // 1. ARRANGE
+        let transaction = loadTransactionFixture(0);
+        let testPair = loadECPairFixture(transactionFixture[0].senderPubKeyIdx);
+        transaction.senderPubKey = testPair.getPublicKeyBuffer();
+
+        // 2. ACT
         transaction.signTransaction(testPair.d);
         let isValid = transaction.validateTransactionSig();
 
         // 3. ASSERT
-        // FIXME: Yes I know this is bad, but I need another way to generate a test fixture
-        expect(isValid).to.equal(true);
-
+        expect(transaction.sig).to.equalBytes(transactionFixture[0].sig);
     });
 });
 
-describe('validateTransactionSig()', function () {
-    it('should return true', function () {
-
+describe('transactionTests: validateTransactionSig()', () => {
+    it('returned true', () => {
         // 1. ARRANGE
-        let transaction = new Transaction();
-        let testPairD = Buffer.from(fixture.valid.privateKey, 'hex');
-        let testPair = EcPair.fromBuffer(testPairD);
-        transaction.senderPubKey = testPair.Q;
-        transaction.receiverPubKey = Buffer.alloc(32);
-        transaction.sig = Buffer.alloc(32);
-        transaction.amount = 1;
-        transaction.calculateTransactionHash();
-        // FIXME: Yes I know this is bad, but I need another way to generate a test fixture
-        transaction.signTransaction(testPair.d);
+        let transaction = loadTransactionFixture(0);
+        let testPair = loadECPairFixture(transactionFixture[0].senderPubKeyIdx);
+        transaction.senderPubKey = testPair.getPublicKeyBuffer();
 
         // 2. ACT
+        transaction.sig = new Buffer(transactionFixture[0].sig, 'hex');
         let isValid = transaction.validateTransactionSig();
 
         // 3. ASSERT
         expect(isValid).to.be.equal(true);
-
     });
 });
 
-describe('validateTransactionData()', function () {
-    it('should return true', function () {
+// TODO: Implement these
+// describe('transactionTests: validateInputs()', () => {
+//     it('returned true', () => {
+//         // 1. ARRANGE
+//         let transaction = loadTransactionFixture(0);
 
-        // 1. ARRANGE
-        let senderPubKey = Buffer.allocUnsafe(32);
-        let receiverPubKey = Buffer.allocUnsafe(32);
-        let sig = Buffer.allocUnsafe(32);
-        let amount = 1;
-        let transaction = new Transaction(senderPubKey, receiverPubKey, sig, amount);
+//         // 2. ACT
+//         transaction.validateInputs();
 
-        // 2. ACT
-        let valid = transaction.validateTransactionData();
+//         // 3. ASSERT
+//     });
+// });
 
-        // 3. ASSERT
-        expect(valid).to.be.equal(true);
+// describe('transactionTests: validateAmount()', () => {
+//     it('returned true', () => {
+//         // 1. ARRANGE
+//         let transaction = loadTransactionFixture(0);
 
-    });
-});
+//         // 2. ACT
+//         transaction.validateAmount();
+
+//         // 3. ASSERT
+//     });
+// });

@@ -1,8 +1,10 @@
 const bcrypto = require('../util/crypto.js');
 const ecdsa = require('../util/ecdsa.js');
 const ECSignature = require('../util/ecsignature');
+const ecurve = require('ecurve');
+const secp256k1 = ecurve.getCurveByName('secp256k1');
 
-// Transaction
+// Transaction - See docs/Transaction.md
 // =============================================================================
 
 const mongoose = require('mongoose');
@@ -12,31 +14,29 @@ const Schema = mongoose.Schema;
 // =============================================================================
 
 let TransactionSchema = new Schema({
-    _id: {
-        type: Schema.Types.ObjectId,
-        required: true
+    hash: {                 // 32 bytes (256 bit hash)
+        type: Buffer,
+        required: true,
+        index: true,
+        unique: true
     },
-    hash: {
+    senderPubKey: {         // Compressed form: 32 bytes + 1 for sign = 33 bytes
         type: Buffer,
         required: true
     },
-    senderPubKey: {
-        type: Object,
+    receiverPubKey: {       // Compressed form: 32 bytes + 1 for sign = 33 bytes
+        type: Buffer,
         required: true
     },
-    receiverPubKey: {
-        type: Object,
+    sig: {                  // 64 Bytes (point on eliptic curve 32B x, 32B y)
+        type: Buffer,
         required: true
     },
-    sig: {
-        type: Object,
+    inputs: {               // 32 bytes (256 bit hash)
+        type: [Buffer],     // Hash of input tx
         required: true
     },
-    inputs: {
-        type: [Buffer], // Hash of input tx
-        required: true
-    },
-    amount: {
+    amount: {               // 4 bytes (32 bit unsigned int)
         type: Number,
         required: true
     }
@@ -46,44 +46,22 @@ let TransactionSchema = new Schema({
 // =============================================================================
 class TransactionClass {
 
-    // Virtual object Properties
-    // =============================================================================
+    get senderPubKeyPoint() {
+        return ecurve.Point.decodeFrom(secp256k1, this.senderPubKey);
+    }
+
+    get receiverPubKeyPoint() {
+        return ecurve.Point.decodeFrom(secp256k1, this.receiverPubKey);
+    }
 
     // Methods
     // =============================================================================
 
-    validateTransactionSig() {
-        let valid = true;
-        valid = ecdsa.verify(this.hash, this.sig, this.senderPubKey);
-        return valid;
-    }
-
-    validateTransactionData() {
-        let valid = true;
-        // TODO: Check that outputs >= inputs
-        return valid;
-    }
-
-    signTransaction(privateKey) {
-        let success = true;
-        try {
-            this.sig = ecdsa.sign(this.hash, privateKey);
-        } catch (err) {
-            if (err) {
-                throw new Error('signTransaction ecdsa.sign Error: ' + err);
-                return;
-            }
-        }
-        return success;
-    }
-
     __byteLength() {
         return (
-            (4) +                     // senderPubKey
-            (4) +                     // receiverPubKey
-            (4) +                     // sig
-            (this.inputs.length) +
-            this.inputs.reduce(function (sum, input) { return sum + 16 + 32; }, 0) +
+            (33) +                     // senderPubKey 33B
+            (33) +                     // receiverPubKey 33B
+            this.inputs.reduce(function (sum, input) { return sum + 32; }, 0) +
             (4)                       // amount
         );
     }
@@ -114,16 +92,11 @@ class TransactionClass {
         function writeVarSlice(slice) { writeVarInt(slice.length); writeSlice(slice); }
         function writeVector(vector) { writeVarInt(vector.length); vector.forEach(writeVarSlice); }
 
-        writeInt32(this.senderPubKey);
-        writeInt32(this.receiverPubKey);
-        writeInt32(this.sig);
+        writeSlice(this.senderPubKey);
+        writeSlice(this.receiverPubKey);
 
         this.inputs.forEach(function (txIn) {
-            writeSlice(txIn.hash);
-            writeInt32(this.senderPubKey);
-            writeInt32(this.receiverPubKey);
-            writeInt32(this.sig);
-            writeInt32(this.amount);
+            writeSlice(txIn);
         });
 
         writeInt32(this.amount);
@@ -134,24 +107,66 @@ class TransactionClass {
         return buffer;
     }
 
-    validateTransactionHash() {
-        return true;
+    calculateTransactionHash() {
+        // TODO: Maybe we should double hash this? https://crypto.stackexchange.com/questions/2465/in-which-situations-is-a-length-extension-attack-a-problem
+        this.hash = bcrypto.sha256(this.__toBuffer(undefined, undefined));
+    }
+
+    signTransaction(privateKey) {
+        let success = true;
+        if (!this.hash) {
+            try {
+                this.calculateTransactionHash();
+            } catch (err) {
+                throw new Error('calculateTransactionHash Error: ' + err);
+                return;
+            }
+        }
+        try {
+            this.sig = ecdsa.sign(this.hash, privateKey).toRSBuffer(undefined, 0);
+        } catch (err) {
+            if (err) {
+                throw new Error('signTransaction ecdsa.sign Error: ' + err);
+                return;
+            }
+        }
+        return success;
+    }
+
+    validateTransactionSig() {
+        let valid = true;
+        if (!this.hash) {
+            this.calculateTransactionHash();
+        }
+        valid = ecdsa.verify(this.hash, ECSignature.fromRSBuffer(this.sig), this.senderPubKeyPoint);
+        return valid;
     }
     
-    calculateTransactionHash() {
-        this.hash = bcrypto.hash256(this.__toBuffer(undefined, undefined));
+    validateInputs() {
+        let valid = true;
+        // TODO: Search blocks for these inputs, and verify that they are unspent
+        return valid;
+    }
+
+    validateAmount() {
+        let valid = true;
+        // TODO: Check that outputs >= inputs
+        return valid;
     }
 }
 
-TransactionSchema.pre('validate', (next) => {
+TransactionSchema.pre('validate', function (next) {
     if (!this.validateTransactionSig())
         this.invalidate('sig', new Error('Invalid transaction signature'));
-    this.validateTransactionData();
+    if (!this.validateInputs())
+        this.invalidate('inputs', new Error('Invalid transaction inputs'));
+    if (!this.validateAmount())
+        this.invalidate('amount', new Error('Invalid transaction amount'));
     next();
 });
 
-TransactionSchema.pre('save', (next) => {
-    this.calculateTransactionHash();
+TransactionSchema.pre('save', function (next) {
+    // this.calculateTransactionHash(); // Note: Might not be necessary here if calculated during validation
     next();
 });
   

@@ -1,6 +1,12 @@
 {
-    "valid": {
-        "privateKey": "748cb1da3400050ff0bb348e327a4ffde5060dc8cdfb798ee3450be996e4108d",
-        "publicKey": "02071791bdeda4bcc43e3b0ed9c7be4a404c91b637d86d4f65a6b1720d6f13682e"
-    }
+    "valid": [
+        {
+            "privateKey": "748cb1da3400050ff0bb348e327a4ffde5060dc8cdfb798ee3450be996e4108d",
+            "publicKey": "02071791bdeda4bcc43e3b0ed9c7be4a404c91b637d86d4f65a6b1720d6f13682e"
+        },
+        {
+            "privateKey": "b7b8e065860a138da9146b26af8897be82f5dfbd705dd52990d395bc9dd4ebcb",
+            "publicKey": "02a5a6f3744db671d0a19970c49f31387a8c811e7da8a971d08b7927206d815100"
+        }
+    ]
 }

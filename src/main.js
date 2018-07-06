@@ -12,6 +12,11 @@ const Block = require('./model/block');
 const Transaction = require('./model/transaction');
 
 mongoose.connect('mongodb://localhost/compchain');
+let db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', function () {
+    console.debug('Connected to mongo successfully');
+});
 
 // configure app to use bodyParser()
 // this will let us get the data from a POST

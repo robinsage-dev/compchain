@@ -8,6 +8,7 @@
     "babel-node": "babel-node",
     "start": "npm run build && nodemon --exec npm run babel-node -- dist/main.js",
     "build": "npm run lint && npm run test && babel src -d dist",
+    "quick-build": "babel src -d dist",
     "lint": "eslint src test --fix"
   },
   "author": "Robinsage",
@@ -17,12 +18,15 @@
     "body-parser": "^1.18.3",
     "chai": "^4.1.2",
     "chai-bytes": "^0.1.1",
+    "commander": "^2.16.0",
     "create-hmac": "^1.1.7",
     "ecurve": "^1.0.6",
     "express": "^4.16.3",
+    "merkle-lib": "^2.0.10",
     "mongoose": "^5.1.7",
     "randombytes": "^2.0.6",
-    "safe-buffer": "^5.1.2"
+    "safe-buffer": "^5.1.2",
+    "varuint-bitcoin": "^1.1.0"
   },
   "devDependencies": {
     "@babel/core": "^7.0.0-beta.51",
