@@ -153,6 +153,30 @@ class TransactionClass {
         // TODO: Check that outputs >= inputs
         return valid;
     }
+
+    toString() {
+        let printableTx = {
+            hash: this.hash.toString('hex'),
+            senderPubKey: this.senderPubKey.toString('hex'),
+            receiverPubKey: this.receiverPubKey.toString('hex'),
+            sig: this.sig.toString('hex'),
+            inputs: this.inputs.map(input => input.toString('hex')),
+            amount: this.amount
+        };
+        return JSON.stringify(printableTx, null, 2);
+    }
+
+    toObject() {
+        let printableTx = {
+            hash: this.hash.toString('hex'),
+            senderPubKey: this.senderPubKey.toString('hex'),
+            receiverPubKey: this.receiverPubKey.toString('hex'),
+            sig: this.sig.toString('hex'),
+            inputs: this.inputs.map(input => input.toString('hex')),
+            amount: this.amount
+        };
+        return printableTx;
+    }
 }
 
 TransactionSchema.pre('validate', function (next) {

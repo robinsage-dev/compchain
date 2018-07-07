@@ -141,26 +141,38 @@ class BlockClass {
         }
         return true;
     }
+
+    toString() {
+        let printableBlock = {
+            hash: this.hash.toString('hex'),
+            prevBlockHash: this.prevBlockHash.toString('hex'),
+            merkleRoot: this.merkleRoot.toString('hex'),
+            difficultyTarget: this.difficultyTarget.toString('hex'),
+            nonce: this.nonce,
+            transactions: this.transactions.map(tx => tx.toObject())
+        };
+        return JSON.stringify(printableBlock, null, 2);
+    }
 }
 
-BlockSchema.pre('validate', (next) => {
-    if (!this.validateBlockHash())
-        this.invalidate('hash', new Error('Invalid block hash'));
-    if (!this.validateInputs())
-        this.invalidate('prevBlockHash', new Error('Invalid previous block hash'));
-    if (!this.validateMerkleRoot())
-        this.invalidate('merkleRoot', new Error('Invalid block merkle root'));
-    if (!this.validateDiffTarget())
-        this.invalidate('diffTarget', new Error('Invalid block difficulty target'));
-    if (!this.validateTransactions())
-        this.invalidate('transactions', new Error('Invalid block transactions'));
+BlockSchema.loadClass(BlockClass);
+
+BlockSchema.pre('validate', next => {
+    // if (!this.validateBlockHash())
+    //     this.invalidate('hash', new Error('Invalid block hash'));
+    // if (!this.validateInputs())
+    //     this.invalidate('prevBlockHash', new Error('Invalid previous block hash'));
+    // if (!this.validateMerkleRoot())
+    //     this.invalidate('merkleRoot', new Error('Invalid block merkle root'));
+    // if (!this.validateDiffTarget())
+    //     this.invalidate('diffTarget', new Error('Invalid block difficulty target'));
+    // if (!this.validateTransactions())
+    //     this.invalidate('transactions', new Error('Invalid block transactions'));
     next();
 });
 
 BlockSchema.pre('save', (next) => {
     next();
 });
-  
-BlockSchema.loadClass(BlockClass);
 
 module.exports = mongoose.model('Block', BlockSchema);

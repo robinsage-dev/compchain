@@ -6,6 +6,7 @@ const ecurve = require('ecurve');
 const secp256k1 = ecurve.getCurveByName('secp256k1');
 const mongoose = require('mongoose');
 
+// NOTE: This does not post to the api, but writes to the database directly
 let sendCoins = (privKey, pubKey, amount) => {
     mongoose.connect('mongodb://localhost/compchain');
     let db = mongoose.connection;
@@ -39,9 +40,7 @@ let generatePrivKey = () => {
 };
 
 program
-    .version('0.0.1')
-    .option('-t --test [test]', 'Test parameter');
-
+    .version('0.0.1');
 
 program
     .command('gen')
