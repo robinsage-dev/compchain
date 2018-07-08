@@ -30,13 +30,17 @@ let TransactionSchema = new Schema({
     },
     sig: {                  // 64 Bytes (point on eliptic curve 32B x, 32B y)
         type: Buffer,
-        required: true
+        required: false     // Special case for coinbase tx
     },
     inputs: {               // 32 bytes (256 bit hash)
         type: [Buffer],     // Hash of input tx
         required: true
     },
     amount: {               // 4 bytes (32 bit unsigned int)
+        type: Number,
+        required: true
+    },
+    timestamp: {            // 4 bytes (32 bit unsigned int)
         type: Number,
         required: true
     }
@@ -57,12 +61,24 @@ class TransactionClass {
     // Methods
     // =============================================================================
 
+    // FIXME: This doesn't seem to be working: Node thing?
+    // constructor(senderPubKey, receiverPubKey, sig, inputs, amount, timestamp) {
+    //     this.senderPubKey = senderPubKey;
+    //     this.receiverPubKey = receiverPubKey;
+    //     this.sig = sig;
+    //     this.inputs = inputs;
+    //     this.amount = amount;
+    //     this.timestamp = timestamp; // TODO: default Date.now() is more than 32 bits!
+    //     this.calculateTransactionHash();
+    // }
+
     __byteLength() {
         return (
             (33) +                     // senderPubKey 33B
             (33) +                     // receiverPubKey 33B
             this.inputs.reduce(function (sum, input) { return sum + 32; }, 0) +
-            (4)                       // amount
+            (4)  +                     // amount
+            (4)                        // timestamp
         );
     }
 
@@ -100,6 +116,7 @@ class TransactionClass {
         });
 
         writeInt32(this.amount);
+        writeInt32(this.timestamp);
 
         // avoid slicing unless necessary
         if (initialOffset !== undefined)
@@ -109,7 +126,17 @@ class TransactionClass {
 
     calculateTransactionHash() {
         // TODO: Maybe we should double hash this? https://crypto.stackexchange.com/questions/2465/in-which-situations-is-a-length-extension-attack-a-problem
-        this.hash = bcrypto.sha256(this.__toBuffer(undefined, undefined));
+        let buffer;
+        try {
+            buffer = this.__toBuffer(undefined, undefined);
+        } catch (err) {
+            console.error(err);
+            throw {
+                description: '__toBuffer Error',
+                error: err
+            };
+        }
+        this.hash = bcrypto.sha256(buffer);
     }
 
     signTransaction(privateKey) {
@@ -118,7 +145,10 @@ class TransactionClass {
             try {
                 this.calculateTransactionHash();
             } catch (err) {
-                throw new Error('calculateTransactionHash Error: ' + err);
+                throw {
+                    description: 'calculateTransactionHash Error: ',
+                    error: err
+                };
                 return;
             }
         }
@@ -135,6 +165,8 @@ class TransactionClass {
 
     validateTransactionSig() {
         let valid = true;
+        // Special case for coinbase transactions (they don't have a sig)
+        if (this.senderPubKey.toString('hex') === 'ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff') return valid;
         if (!this.hash) {
             this.calculateTransactionHash();
         }
@@ -154,6 +186,12 @@ class TransactionClass {
         return valid;
     }
 
+    validateTimestamp() {
+        let valid = true;
+        // TODO: Check consensus rules for how far in the past and into the future this can be
+        return valid;
+    }
+
     toString() {
         let printableTx = {
             hash: this.hash.toString('hex'),
@@ -166,7 +204,7 @@ class TransactionClass {
         return JSON.stringify(printableTx, null, 2);
     }
 
-    toObject() {
+    toPrintableObject() {
         let printableTx = {
             hash: this.hash.toString('hex'),
             senderPubKey: this.senderPubKey.toString('hex'),

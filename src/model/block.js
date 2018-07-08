@@ -41,14 +41,17 @@ let BlockSchema = new Schema({
 // Transaction Class
 // =============================================================================
 class BlockClass {
-    
+    // TODO: add constructor
+
     __byteLength() {
         return (
-            (32) +                     // prevBlockHash
-            (32) +                     // merkleRoot
-            (32) +                     // difficultyTarget
-            (4)  +                     // nonce
-            this.transactions.reduce(function (sum, transaction) { return sum + transaction.__byteLength() + 64; }, 0)  // 64 is the sig
+            32 + // prevBlockHash
+            32 + // merkleRoot
+            32 + // difficultyTarget
+            4 + // nonce
+            this.transactions.reduce(function (sum, transaction) {
+                return sum + transaction.__byteLength() + 64;
+            }, 0) // 64 is the sig
         );
     }
 
@@ -75,8 +78,14 @@ class BlockClass {
             varuint.encode(i, buffer, offset);
             offset += varuint.encode.bytes;
         }
-        function writeVarSlice(slice) { writeVarInt(slice.length); writeSlice(slice); }
-        function writeVector(vector) { writeVarInt(vector.length); vector.forEach(writeVarSlice); }
+        function writeVarSlice(slice) {
+            writeVarInt(slice.length);
+            writeSlice(slice);
+        }
+        function writeVector(vector) {
+            writeVarInt(vector.length);
+            vector.forEach(writeVarSlice);
+        }
 
         writeSlice(this.prevBlockHash);
         writeSlice(this.merkleRoot);
@@ -94,11 +103,22 @@ class BlockClass {
             return buffer.slice(initialOffset, offset);
         return buffer;
     }
-    
+
     calculateMerkleRoot() {
-        if (this.transactions.length === 0) throw TypeError('Cannot compute merkle root for zero transactions');
-        if (this.transactions.length % 2 != 0) throw TypeError('Cannot have odd number of transactions for merkle root');
-        let transactionHashes = this.transactions.map(tx => { 
+        if (this.transactions.length === 0) {
+            throw {
+                code: 1,
+                description: 'Cannot compute merkle root for zero transactions'
+            };
+        }
+        if (this.transactions.length % 2 != 0) {
+            throw {
+                code: 2,
+                description:
+                    'Cannot have odd number of transactions for merkle root'
+            };
+        }
+        let transactionHashes = this.transactions.map(tx => {
             tx.calculateTransactionHash();
             return tx.hash;
         });
@@ -114,17 +134,17 @@ class BlockClass {
         // TODO: hash the block and verify
         return true;
     }
-    
+
     validatePrevBlockHash() {
         // TODO: Search database for block with matching hash
         return true;
     }
-    
+
     validateMerkleRoot() {
         // TODO: create the merkle root from the transactions and make sure it matches
         return true;
     }
-    
+
     validateDiffTarget() {
         // TODO: make sure the block hash is less than the diff target
         // TODO: make sure the diff target is valid
@@ -134,7 +154,7 @@ class BlockClass {
     validateMerkleRoot() {
         return true;
     }
-    
+
     validateTransactions() {
         for (let transaction of this.transactions) {
             // TODO: create a transaction instance, and validation will happen upon creation
@@ -149,7 +169,7 @@ class BlockClass {
             merkleRoot: this.merkleRoot.toString('hex'),
             difficultyTarget: this.difficultyTarget.toString('hex'),
             nonce: this.nonce,
-            transactions: this.transactions.map(tx => tx.toObject())
+            transactions: this.transactions.map(tx => tx.toPrintableObject())
         };
         return JSON.stringify(printableBlock, null, 2);
     }
@@ -157,22 +177,53 @@ class BlockClass {
 
 BlockSchema.loadClass(BlockClass);
 
-BlockSchema.pre('validate', next => {
-    // if (!this.validateBlockHash())
-    //     this.invalidate('hash', new Error('Invalid block hash'));
-    // if (!this.validateInputs())
-    //     this.invalidate('prevBlockHash', new Error('Invalid previous block hash'));
-    // if (!this.validateMerkleRoot())
-    //     this.invalidate('merkleRoot', new Error('Invalid block merkle root'));
-    // if (!this.validateDiffTarget())
-    //     this.invalidate('diffTarget', new Error('Invalid block difficulty target'));
-    // if (!this.validateTransactions())
-    //     this.invalidate('transactions', new Error('Invalid block transactions'));
+// Do validation checks as API hooks
+BlockSchema.pre('validate', function (next) {
+    if (!this.validateBlockHash())
+        this.invalidate('hash', new Error('Invalid block hash'));
+    if (!this.validatePrevBlockHash())
+        this.invalidate(
+            'prevBlockHash',
+            new Error('Invalid previous block hash')
+        );
+    if (!this.validateMerkleRoot())
+        this.invalidate('merkleRoot', new Error('Invalid block merkle root'));
+    if (!this.validateDiffTarget())
+        this.invalidate(
+            'diffTarget',
+            new Error('Invalid block difficulty target')
+        );
+    if (!this.validateTransactions())
+        this.invalidate(
+            'transactions',
+            new Error('Invalid block transactions')
+        );
     next();
 });
 
-BlockSchema.pre('save', (next) => {
-    next();
+// BlockSchema.pre('save', (next) => {
+//     next();
+// });
+
+BlockSchema.post('save', function () {
+    // delete the txs from the mempool (mongo collection) if there were included in the block
+    // FIXME: This aint working. Need to figure out how to iterate over the transactions
+    for (let tx in this.transactions) {
+        if (this.transactions.hasOwnProperty(tx)) {
+            // http://mongoosejs.com/docs/api.html#findbyidanddelete_findByIdAndDelete
+            let query = {hash: tx.hash};
+            Transaction.findOneAndDelete(query, (err, transaction) => {
+                if (err) {
+                    throw err;
+                }
+                console.log(
+                    `Transaction deleted from mempool since it was mined: ${
+                        transaction.hash
+                    }`
+                );
+            });
+        }
+    }
 });
 
 module.exports = mongoose.model('Block', BlockSchema);

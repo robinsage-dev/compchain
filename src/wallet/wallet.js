@@ -8,7 +8,7 @@ const mongoose = require('mongoose');
 
 // NOTE: This does not post to the api, but writes to the database directly
 let sendCoins = (privKey, pubKey, amount) => {
-    mongoose.connect('mongodb://localhost/compchain');
+    mongoose.connect('mongodb://localhost/oasis');
     let db = mongoose.connection;
     db.on('error', console.error.bind(console, 'connection error:'));
     db.once('open', function () {
@@ -16,12 +16,21 @@ let sendCoins = (privKey, pubKey, amount) => {
     });
     let transaction = new Transaction();
     let senderPair = EcPair.fromBuffer(new Buffer(privKey, 'hex'));
+    transaction.timestamp = Math.floor(Date.now()/1000);
     transaction.senderPubKey = senderPair.getPublicKeyBuffer();
     transaction.receiverPubKey = new Buffer(pubKey, 'hex');
     transaction.amount = amount;
     // TODO: Find spendable inputs
-    transaction.inputs = [Buffer.from('ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff', 'hex')]; // just dummy hashes for now
-    transaction.signTransaction(senderPair.d);
+    transaction.inputs = [Buffer.from('f80b755a0b2a5ae930aa89f38c896ee6a8ce0a34c900aeac400104e6b06ef36e', 'hex')]; // just dummy hashes for now
+    try {
+        transaction.signTransaction(senderPair.d);
+    } catch (err) {
+        console.error(err);
+        throw {
+            description: 'signTransaction failure',
+            error: err
+        };
+    }
     transaction.save( function (err, tx) {
         if (err) {
             console.error('Error saving to mongo: ' + err);

@@ -38,3 +38,4 @@ Alice wants to send Bob 10 coins using a previous input of 10 coins, for simplic
     5. Continue until you arrive to one hash (root hash). This is the merkle root.
     `cc03cfae993fdcc25a0957d8f0c9215018212f562393eda4c25a89456c3c9a01`
     
+3. TODO: Finish this

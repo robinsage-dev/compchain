@@ -11,7 +11,7 @@ const mongoose = require('mongoose');
 const Block = require('./model/block');
 const Transaction = require('./model/transaction');
 
-mongoose.connect('mongodb://localhost/compchain');
+mongoose.connect('mongodb://localhost/oasis');
 let db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function () {

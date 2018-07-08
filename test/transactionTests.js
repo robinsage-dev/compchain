@@ -125,3 +125,15 @@ describe('transactionTests: validateTransactionSig()', () => {
 //         // 3. ASSERT
 //     });
 // });
+
+// describe('transactionTests: validateTimestamp()', () => {
+//     it('returned true', () => {
+//         // 1. ARRANGE
+//         let transaction = loadTransactionFixture(0);
+
+//         // 2. ACT
+//         transaction.validateTimestamp();
+
+//         // 3. ASSERT
+//     });
+// });
