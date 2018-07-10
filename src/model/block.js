@@ -157,6 +157,7 @@ class BlockClass {
 
     validateTransactions() {
         for (let transaction of this.transactions) {
+            // TODO: Make a specific check for the coinbase transaction. Must have the proper format and be equal to consensus value for output value.
             // TODO: create a transaction instance, and validation will happen upon creation
         }
         return true;
