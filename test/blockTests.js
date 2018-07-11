@@ -34,6 +34,7 @@ let loadBlockFixture = (idx) => {
     block.merkleRoot = Buffer.from(blockFixture[idx].merkleRoot, 'hex');
     block.difficultyTarget = Buffer.from(blockFixture[idx].difficultyTarget, 'hex');
     block.nonce = blockFixture[idx].nonce;
+    block.timestamp = blockFixture[idx].timestamp;
     return block;
 };
 
@@ -41,30 +42,6 @@ let loadBlockFixture = (idx) => {
 // =============================================================================
 
 // TODO: Add failure mode tests
-describe('blockTests: calculateMerkleRoot() Odd Rejected', () => {
-    it('throw an error about odd number of txs', () => {
-        // 1. ARRANGE
-        let block = loadBlockFixture(0);
-
-        // 2. ACT
-
-        // 3. ASSERT
-        expect(block.calculateMerkleRoot).to.throw(TypeError);
-    });
-});
-
-describe('blockTests: calculateMerkleRoot()', () => {
-    it('return the expected buffer', () => {
-        // 1. ARRANGE
-        let block = loadBlockFixture(1);
-
-        // 2. ACT
-        block.calculateMerkleRoot();
-
-        // 3. ASSERT
-        expect(block.merkleRoot).to.be.equalBytes(blockFixture[1].merkleRoot);
-    });
-});
 
 describe('blockTests: __byteLength()', () => {
     it('returned the expected number of bytes', () => {
@@ -75,7 +52,7 @@ describe('blockTests: __byteLength()', () => {
         let length = block.__byteLength();
 
         // 3. ASSERT
-        expect(length).to.be.equal(100 + loadTransactionFixture(0).__byteLength() + loadTransactionFixture(1).__byteLength() + 64 * 2);
+        expect(length).to.be.equal(104);
     });
 });
 
@@ -119,6 +96,19 @@ describe('blockTests: validatePrevBlockHash()', () => {
     });
 });
 
+describe('blockTests: calculateMerkleRoot()', () => {
+    it('return the expected buffer', () => {
+        // 1. ARRANGE
+        let block = loadBlockFixture(1);
+
+        // 2. ACT
+        block.calculateMerkleRoot();
+
+        // 3. ASSERT
+        expect(block.merkleRoot).to.be.equalBytes(blockFixture[1].merkleRoot);
+    });
+});
+
 describe('blockTests: validateMerkleRoot()', () => {
     it('returned true', () => {
         // 1. ARRANGE
@@ -152,6 +142,19 @@ describe('blockTests: validateTransactions()', () => {
 
         // 2. ACT
         let valid = block.validateTransactions();
+
+        // 3. ASSERT
+        expect(valid).to.be.equal(true);
+    });
+});
+
+describe('blockTests: validateTimestamp()', () => {
+    it('returned true', () => {
+        // 1. ARRANGE
+        let block = loadBlockFixture(1);
+
+        // 2. ACT
+        let valid = block.validateTimestamp();
 
         // 3. ASSERT
         expect(valid).to.be.equal(true);

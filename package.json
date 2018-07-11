@@ -22,7 +22,7 @@
     "create-hmac": "^1.1.7",
     "ecurve": "^1.0.6",
     "express": "^4.16.3",
-    "merkle-lib": "^2.0.10",
+    "merkle": "^0.6.0",
     "mongoose": "^5.1.7",
     "randombytes": "^2.0.6",
     "safe-buffer": "^5.1.2",

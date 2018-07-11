@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const Transaction = require('./transaction');
 const bcrypto = require('../util/crypto.js');
 const varuint = require('varuint-bitcoin');
-const fastRoot = require('merkle-lib/fastRoot');
+const merkle = require('merkle');
 
 // Block - See docs/Block.md
 // =============================================================================
@@ -32,6 +32,7 @@ let BlockSchema = new Schema({
         required: true
     },
     nonce: Number,
+    timestamp: Number,
     transactions: {
         type: [Transaction.schema],
         required: true
@@ -49,9 +50,7 @@ class BlockClass {
             32 + // merkleRoot
             32 + // difficultyTarget
             4 + // nonce
-            this.transactions.reduce(function (sum, transaction) {
-                return sum + transaction.__byteLength() + 64;
-            }, 0) // 64 is the sig
+            4 // timestamp
         );
     }
 
@@ -92,11 +91,7 @@ class BlockClass {
 
         writeSlice(this.difficultyTarget);
         writeInt32(this.nonce);
-
-        this.transactions.forEach(function (tx) {
-            writeSlice(tx.__toBuffer());
-            writeSlice(tx.sig);
-        });
+        writeInt32(this.timestamp);
 
         // avoid slicing unless necessary
         if (initialOffset !== undefined)
@@ -105,25 +100,26 @@ class BlockClass {
     }
 
     calculateMerkleRoot() {
-        if (this.transactions.length === 0) {
-            throw {
-                code: 1,
-                description: 'Cannot compute merkle root for zero transactions'
-            };
-        }
-        if (this.transactions.length % 2 != 0) {
-            throw {
-                code: 2,
-                description:
-                    'Cannot have odd number of transactions for merkle root'
-            };
-        }
+        // if (this.transactions.length === 0) {
+        //     throw {
+        //         code: 1,
+        //         description: 'Cannot compute merkle root for zero transactions'
+        //     };
+        // }
+        // if (this.transactions.length % 2 != 0) {
+        //     throw {
+        //         code: 2,
+        //         description:
+        //             'Cannot have odd number of transactions for merkle root'
+        //     };
+        // }
         let transactionHashes = this.transactions.map(tx => {
             tx.calculateTransactionHash();
             return tx.hash;
         });
-        // NOTE: This has vulnerabilities (2nd pre-image attack and duplicate on odd numbered leaves)
-        this.merkleRoot = fastRoot(transactionHashes, bcrypto.sha256); // Should probably use hash256
+
+        // NOTE: This implementation does not have the same problems as Bitcoin's
+        this.merkleRoot = merkle('sha256').sync(transactionHashes); // Should probably use hash256
     }
 
     calculateBlockHash() {
@@ -163,6 +159,10 @@ class BlockClass {
         return true;
     }
 
+    validateTimestamp() {
+        return true;
+    }
+
     toString() {
         let printableBlock = {
             hash: this.hash.toString('hex'),
@@ -183,22 +183,15 @@ BlockSchema.pre('validate', function (next) {
     if (!this.validateBlockHash())
         this.invalidate('hash', new Error('Invalid block hash'));
     if (!this.validatePrevBlockHash())
-        this.invalidate(
-            'prevBlockHash',
-            new Error('Invalid previous block hash')
-        );
+        this.invalidate('prevBlockHash', new Error('Invalid previous block hash'));
     if (!this.validateMerkleRoot())
         this.invalidate('merkleRoot', new Error('Invalid block merkle root'));
     if (!this.validateDiffTarget())
-        this.invalidate(
-            'diffTarget',
-            new Error('Invalid block difficulty target')
-        );
+        this.invalidate('diffTarget', new Error('Invalid block difficulty target'));
     if (!this.validateTransactions())
-        this.invalidate(
-            'transactions',
-            new Error('Invalid block transactions')
-        );
+        this.invalidate('transactions', new Error('Invalid block transactions'));
+    if (!this.validateTimestamp())
+        this.invalidate('timestamp', new Error('Invalid timestamp'));
     next();
 });
 

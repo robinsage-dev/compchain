@@ -77,8 +77,7 @@ class TransactionClass {
             (33) +                     // senderPubKey 33B
             (33) +                     // receiverPubKey 33B
             this.inputs.reduce(function (sum, input) { return sum + 32; }, 0) +
-            (4)  +                     // amount
-            (4)                        // timestamp
+            (4)                        // amount
         );
     }
 
@@ -116,7 +115,6 @@ class TransactionClass {
         });
 
         writeInt32(this.amount);
-        writeInt32(this.timestamp);
 
         // avoid slicing unless necessary
         if (initialOffset !== undefined)
