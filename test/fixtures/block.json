@@ -1,20 +1,28 @@
 [
     {
         "prevBlockHash": "0000000000000000000000000000000000000000000000000000000000000000",
-        "merkleRoot": "37a1f64cb5fbe65e181846769dc06df84c8c9d39bc3c0edb2718061943c7b580",
+        "merkleRoot": "a1b6c177b967c4cb46bc8ef58e240a4274d55ce23fbf1d99b5a9f3ebd26c736a",
         "difficultyTarget": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
         "nonce": 0,
         "timestamp": 1531328326,
-        "numTx": 1
+        "numTx": 2
     },
     {
         "prevBlockHash": "0000000000000000000000000000000000000000000000000000000000000000",
-        "merkleRoot": "37a1f64cb5fbe65e181846769dc06df84c8c9d39bc3c0edb2718061943c7b580",
+        "merkleRoot": "a1b6c177b967c4cb46bc8ef58e240a4274d55ce23fbf1d99b5a9f3ebd26c736a",
         "difficultyTarget": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
         "nonce": 0,
         "timestamp": 1531328326,
         "numTx": 2,
-        "hash": "71012f7e822722e443a1e910c8451f462a75782c840f2f7134831c7f390550e1",
-        "buffer": "000000000000000000000000000000000000000000000000000000000000000037a1f64cb5fbe65e181846769dc06df84c8c9d39bc3c0edb2718061943c7b580ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff000000004637465B"
+        "hash": "d082435173c3d6db317a2b5b08085b6009ef27c1d35e8c848375de186a9f9639",
+        "buffer": "0000000000000000000000000000000000000000000000000000000000000000a1b6c177b967c4cb46bc8ef58e240a4274d55ce23fbf1d99b5a9f3ebd26c736affffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff000000004637465b"
+    },
+    {
+        "prevBlockHash": "0000000000000000000000000000000000000000000000000000000000000000",
+        "merkleRoot": "3a1655004f72615f755b01c4adc20791227ae3bf16e34b4eb61c3badb5df7bfb",
+        "difficultyTarget": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "nonce": 0,
+        "timestamp": 1531328326,
+        "numTx": 1
     }
 ]

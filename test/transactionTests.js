@@ -13,6 +13,7 @@ let loadTransactionFixture = (idx) => {
     transaction.senderPubKey = Buffer.from(cryptoFixture.valid[transactionFixture[idx].senderPubKeyIdx].publicKey, 'hex');
     transaction.receiverPubKey = Buffer.from(cryptoFixture.valid[transactionFixture[idx].receiverPubKeyIdx].publicKey, 'hex');
     transaction.amount = transactionFixture[idx].amount;
+    transaction.blockHeight = transactionFixture[idx].blockHeight;
     for (let tx of transactionFixture[idx].inputs) {
         transaction.inputs.push(Buffer.from(tx, 'hex'));
     }
@@ -137,3 +138,8 @@ describe('transactionTests: validateTransactionSig()', () => {
 //         // 3. ASSERT
 //     });
 // });
+
+
+/* TODO: Missing tests
+1. Test missing tx properties in validation
+*/

@@ -20,8 +20,9 @@ let sendCoins = (privKey, pubKey, amount) => {
     transaction.senderPubKey = senderPair.getPublicKeyBuffer();
     transaction.receiverPubKey = new Buffer(pubKey, 'hex');
     transaction.amount = amount;
-    // TODO: Find spendable inputs
-    transaction.inputs = [Buffer.from('f80b755a0b2a5ae930aa89f38c896ee6a8ce0a34c900aeac400104e6b06ef36e', 'hex')]; // just dummy hashes for now
+    transaction.blockHeight = 0; // TODO: Should this be set to the closest guess for more validation?    
+    // FIXME: Find spendable inputs
+    transaction.inputs = [Buffer.from('f80b755a0b2a5ae930aa89f38c896ee6a8ce0a34c900aeac400104e6b06ef36e', 'hex')];
     try {
         transaction.signTransaction(senderPair.d);
     } catch (err) {

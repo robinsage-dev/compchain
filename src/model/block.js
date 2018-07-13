@@ -31,8 +31,14 @@ let BlockSchema = new Schema({
         type: Buffer,
         required: true
     },
-    nonce: Number,
-    timestamp: Number,
+    nonce: {
+        type: Number,
+        required: true
+    },
+    timestamp: {
+        type: Number,
+        required: true
+    },
     transactions: {
         type: [Transaction.schema],
         required: true
@@ -99,33 +105,26 @@ class BlockClass {
         return buffer;
     }
 
+    setMerkleRoot() {
+        this.merkleRoot = Buffer.from(this.calculateMerkleRoot(), 'hex');
+    }
+
     calculateMerkleRoot() {
-        // if (this.transactions.length === 0) {
-        //     throw {
-        //         code: 1,
-        //         description: 'Cannot compute merkle root for zero transactions'
-        //     };
-        // }
-        // if (this.transactions.length % 2 != 0) {
-        //     throw {
-        //         code: 2,
-        //         description:
-        //             'Cannot have odd number of transactions for merkle root'
-        //     };
-        // }
         let transactionHashes = this.transactions.map(tx => {
             tx.calculateTransactionHash();
-            return tx.hash;
+            return tx.hash.toString('hex');
         });
 
         // NOTE: This implementation does not have the same problems as Bitcoin's
-        this.merkleRoot = merkle('sha256').sync(transactionHashes); // Should probably use hash256
+        let useUppercase = false;
+        return merkle('sha256', useUppercase).sync(transactionHashes).root(); // Should probably use hash256
     }
 
     calculateBlockHash() {
         this.hash = bcrypto.sha256(this.__toBuffer(undefined, undefined)); // TODO: Should probably use hash256
     }
 
+    // TODO: Refactor validation functions to validation module
     validateBlockHash() {
         // TODO: hash the block and verify
         return true;
@@ -136,11 +135,6 @@ class BlockClass {
         return true;
     }
 
-    validateMerkleRoot() {
-        // TODO: create the merkle root from the transactions and make sure it matches
-        return true;
-    }
-
     validateDiffTarget() {
         // TODO: make sure the block hash is less than the diff target
         // TODO: make sure the diff target is valid
@@ -148,6 +142,8 @@ class BlockClass {
     }
 
     validateMerkleRoot() {
+        if (!this.merkleRoot) return false;
+        if (this.merkleRoot.toString('hex') !== this.calculateMerkleRoot()) return false;
         return true;
     }
 
@@ -202,20 +198,24 @@ BlockSchema.pre('validate', function (next) {
 BlockSchema.post('save', function () {
     // delete the txs from the mempool (mongo collection) if there were included in the block
     // FIXME: This aint working. Need to figure out how to iterate over the transactions
-    for (let tx in this.transactions) {
-        if (this.transactions.hasOwnProperty(tx)) {
-            // http://mongoosejs.com/docs/api.html#findbyidanddelete_findByIdAndDelete
-            let query = {hash: tx.hash};
-            Transaction.findOneAndDelete(query, (err, transaction) => {
-                if (err) {
-                    throw err;
-                }
-                console.log(
-                    `Transaction deleted from mempool since it was mined: ${
-                        transaction.hash
-                    }`
-                );
-            });
+    if (this.hash.toString('hex') !== '0000eca7102e81f8984f3634d2423b4b4291ff72721984d2190285547d45eb44') { // Skip if genesis block
+        console.log('deleting txs from mempool...');
+        for (let tx in this.transactions) {
+            console.log('deleting: ' + tx.toString());
+            if (this.transactions.hasOwnProperty(tx)) {
+                // http://mongoosejs.com/docs/api.html#findbyidanddelete_findByIdAndDelete
+                let query = {hash: tx.hash};
+                Transaction.findOneAndDelete(query, (err, transaction) => {
+                    if (err) {
+                        throw err;
+                    }
+                    console.log(
+                        `Transaction deleted from mempool since it was mined: ${
+                            transaction.hash
+                        }`
+                    );
+                });
+            }
         }
     }
 });

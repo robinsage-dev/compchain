@@ -40,7 +40,7 @@ let TransactionSchema = new Schema({
         type: Number,
         required: true
     },
-    timestamp: {            // 4 bytes (32 bit unsigned int)
+    blockHeight: {          // 4 bytes (32 bit unsigned int)
         type: Number,
         required: true
     }
@@ -77,7 +77,8 @@ class TransactionClass {
             (33) +                     // senderPubKey 33B
             (33) +                     // receiverPubKey 33B
             this.inputs.reduce(function (sum, input) { return sum + 32; }, 0) +
-            (4)                        // amount
+            (4)  +                     // amount
+            (4)                        // block height
         );
     }
 
@@ -115,6 +116,7 @@ class TransactionClass {
         });
 
         writeInt32(this.amount);
+        writeInt32(this.blockHeight);
 
         // avoid slicing unless necessary
         if (initialOffset !== undefined)
@@ -161,6 +163,7 @@ class TransactionClass {
         return success;
     }
 
+    // TODO: refactor validation functions to validation module
     validateTransactionSig() {
         let valid = true;
         // Special case for coinbase transactions (they don't have a sig)

@@ -6,7 +6,8 @@
   "scripts": {
     "test": "mocha",
     "babel-node": "babel-node",
-    "start": "npm run build && nodemon --exec npm run babel-node -- dist/main.js",
+    "start-mon": "npm run build && nodemon --exec npm run babel-node -- dist/main.js",
+    "start": "npm run build && npm run babel-node -- dist/main.js",
     "build": "npm run lint && npm run test && babel src -d dist",
     "quick-build": "babel src -d dist",
     "lint": "eslint src test --fix"
@@ -22,7 +23,7 @@
     "create-hmac": "^1.1.7",
     "ecurve": "^1.0.6",
     "express": "^4.16.3",
-    "merkle": "^0.6.0",
+    "merkle": "git://github.com/JBaczuk/merkle.git",
     "mongoose": "^5.1.7",
     "randombytes": "^2.0.6",
     "safe-buffer": "^5.1.2",

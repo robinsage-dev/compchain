@@ -4,6 +4,7 @@ env:
     mocha: true
 parserOptions:
     ecmaFeatures: {jsx: true}
+    ecmaVersion: 8
 rules:
     semi: [2, always]
     comma-style: [1, last]
@@ -38,6 +39,7 @@ rules:
     no-empty-function: [error, {allow: [arrowFunctions, constructors]}]
     indent: [error, 4]
     no-irregular-whitespace: 2
+    require-await: 2
 settings:
     import/resolver: {node: {extensions: [.coffee, .js, .jsx]}}
     import/ignore: [node_modules]

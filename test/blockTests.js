@@ -16,6 +16,7 @@ let loadTransactionFixture = (idx) => {
     transaction.receiverPubKey = Buffer.from(cryptoFixture.valid[transactionFixture[idx].receiverPubKeyIdx].publicKey, 'hex');
     transaction.sig = Buffer.from(transactionFixture[idx].sig, 'hex');
     transaction.amount = transactionFixture[idx].amount;
+    transaction.blockHeight = transactionFixture[idx].blockHeight;
     for (let tx of transactionFixture[idx].inputs) {
         transaction.inputs.push(Buffer.from(tx, 'hex'));
     }
@@ -31,7 +32,7 @@ let loadBlockFixture = (idx) => {
             block.transactions.push(loadTransactionFixture(i));
         }
     });
-    block.merkleRoot = Buffer.from(blockFixture[idx].merkleRoot, 'hex');
+    block.setMerkleRoot();
     block.difficultyTarget = Buffer.from(blockFixture[idx].difficultyTarget, 'hex');
     block.nonce = blockFixture[idx].nonce;
     block.timestamp = blockFixture[idx].timestamp;
@@ -102,14 +103,27 @@ describe('blockTests: calculateMerkleRoot()', () => {
         let block = loadBlockFixture(1);
 
         // 2. ACT
-        block.calculateMerkleRoot();
+        let root = block.calculateMerkleRoot();
 
         // 3. ASSERT
-        expect(block.merkleRoot).to.be.equalBytes(blockFixture[1].merkleRoot);
+        expect(Buffer.from(root, 'hex')).to.be.equalBytes(Buffer.from(blockFixture[1].merkleRoot, 'hex'));
     });
 });
 
-describe('blockTests: validateMerkleRoot()', () => {
+describe('blockTests: setMerkleRoot()', () => {
+    it('return the expected buffer', () => {
+        // 1. ARRANGE
+        let block = loadBlockFixture(1);
+
+        // 2. ACT
+        block.setMerkleRoot(); // This is already done in the loadBlockFixture function
+
+        // 3. ASSERT
+        expect(block.merkleRoot).to.be.equalBytes(Buffer.from(blockFixture[1].merkleRoot, 'hex'));
+    });
+});
+
+describe('blockTests: validateMerkleRoot() 2 txs', () => {
     it('returned true', () => {
         // 1. ARRANGE
         let block = loadBlockFixture(1);
@@ -119,6 +133,33 @@ describe('blockTests: validateMerkleRoot()', () => {
 
         // 3. ASSERT
         expect(valid).to.be.equal(true);
+    });
+});
+
+describe('blockTests: validateMerkleRoot() 1 tx', () => {
+    it('returned true', () => {
+        // 1. ARRANGE
+        let block = loadBlockFixture(2);
+
+        // 2. ACT
+        let valid = block.validateMerkleRoot();
+
+        // 3. ASSERT
+        expect(valid).to.be.equal(true);
+    });
+});
+
+describe('blockTests: validateMerkleRoot() invalid', () => {
+    it('returned false', () => {
+        // 1. ARRANGE
+        let block = loadBlockFixture(0);
+        block.merkleRoot = blockFixture[0].merkleRoot;
+
+        // 2. ACT
+        let valid = block.validateMerkleRoot();
+
+        // 3. ASSERT
+        expect(valid).to.be.equal(false);
     });
 });
 
@@ -160,3 +201,7 @@ describe('blockTests: validateTimestamp()', () => {
         expect(valid).to.be.equal(true);
     });
 });
+
+/* TODO: Missing tests
+1. Test missing block properties in validation
+*/

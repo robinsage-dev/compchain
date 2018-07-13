@@ -59,7 +59,6 @@ function initApiRouter() {
             // save the block and check for errors
             block.save(function (err) {
                 if (err) res.send(err);
-
                 res.json({message: 'Block saved: ' + block.hash});
             });
         })
@@ -68,7 +67,6 @@ function initApiRouter() {
         .get(function (req, res) {
             Block.find(function (err, blocks) {
                 if (err) res.send(err);
-
                 res.json(blocks);
             });
         });

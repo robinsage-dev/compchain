@@ -13,103 +13,69 @@ function createCoinbaseTx(coinbasePubKey) {
     coinbaseTx.receiverPubKey = Buffer.from(coinbasePubKey, 'hex');
     coinbaseTx.sig = Buffer.from('ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff', 'hex');
     coinbaseTx.inputs = [Buffer.from('f80b755a0b2a5ae930aa89f38c896ee6a8ce0a34c900aeac400104e6b06ef36e', 'hex')];
-    coinbaseTx.amount = 10000;
+    coinbaseTx.amount = 10000; // Gen block initial reward
     coinbaseTx.timestamp = Math.floor(Date.now()/1000);
     coinbaseTx.calculateTransactionHash();
     return coinbaseTx;
 }
 
-let getBlockTemplate = (coinbasePubKey) => {
+// TODO: This should be an api call
+async function getBlockTemplate(coinbasePubKey) {
     // Connect to Mongo db
     db.on('error', console.error.bind(console, 'connection error:'));
     db.once('open', function () {
         // TODO: should this be awaited by everything proceeding?
     });
-    // Get transactions from database (getting all for now)
-    let promise = Transaction.find()
-        .then((transactions) => {
-            console.debug(`txs length: ${transactions.length}`);
-            if (transactions.length == 0) {
-                throw {
-                    code: 1,
-                    description: 'No transactions to mine!'
-                };
-            } 
-            // Get previous block hash (setting statically for now)
-            let prevBlockHash = Buffer.from(
-                'ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
-                'hex'
-            );
-            // Get previous difficulty target (setting statically for now)
-            // let difficultyTarget = Buffer.from(
-            //     '00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
-            //     'hex'
-            // );
-            let difficultyTarget = Buffer.from(
-                '0000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
-                'hex'
-            );
-            // Create a block
-            let block = new Block();
-            block.prevBlockHash = prevBlockHash;
-            block.difficultyTarget = difficultyTarget;
-            block.nonce = 0;
-            let coinbaseTx = createCoinbaseTx(coinbasePubKey);
-            transactions.push(coinbaseTx);
-            block.transactions = transactions;
-            // console.debug(`txs: ${block.transactions.map(tx => tx.toString())}`);
-            // TODO: Make sure there is an even number of tx
-            if (block.transactions.length % 2 != 0) {
-                block.transactions.pop(); // Drop the last one to get an even number
-            }
-            try {
-                block.calculateMerkleRoot();
-            } catch (err) {
-                throw {
-                    description: 'calculateMerkleRoot error',
-                    error: err
-                };
-            }
-            block.calculateBlockHash();
-            // Return the block
-            return block;
 
-        })
-        .catch( err => {
-            console.error(err);
-            throw err;
-        });
-    return promise;
-};
+    let blocks = await Block.find();
+    let lastBlock = blocks[blocks.length - 1];
+    let transactions = await Transaction.find();
+    // Create a template block
+    let block = new Block();
+    block.prevBlockHash = lastBlock.hash;
+    block.difficultyTarget = lastBlock.difficultyTarget;
+    block.nonce = 0;
+    let coinbaseTx = createCoinbaseTx(coinbasePubKey);
+    coinbaseTx.blockHeight = blocks.length;
+    coinbaseTx.calculateTransactionHash();
+    transactions.push(coinbaseTx);
+    block.transactions = transactions;
+    block.timestamp = Math.floor(Date.now()/1000);
+    
+    try {
+        block.setMerkleRoot();
+    } catch (err) {
+        throw {
+            description: 'calculateMerkleRoot error',
+            error: err
+        };
+    }
+    block.calculateBlockHash();
+    // Return the block
+    return block;
+}
 
 // NOTE: This does not post to the api, but writes to the database directly
-let mineBlock = (pubKey) => {
-    getBlockTemplate(pubKey)
-        .then( (block) => {
-            // Hash the block until it's valid (less than diff target)
-            while (block.hash.compare(block.difficultyTarget) == 1) {
-                block.nonce += 1;
-                block.calculateBlockHash();
-            }
-            console.log(`Valid block found: Block Hash: ${block.hash.toString('hex')}\nNonce: ${block.nonce}`);
-            return block;
-        })
-        .then( (block) => block.save())
-        .then( (block, err) => {
-            console.debug('block saved');
-            if (err) {
-                console.error(err);
-                throw err;
-            }
-            db.close();
-            console.log('Block saved to mongo: ' + block);
-            process.exit();
-        })
-        .catch( (err) => {
-            console.error('Error mining block: ' + err);
-            process.exit();
-        });
-};
+async function mineBlock(pubKey) {
+    let block = await getBlockTemplate(pubKey);
+    // Hash the block until it's valid (less than diff target)
+    while (block.hash.compare(block.difficultyTarget) == 1) {
+        block.nonce += 1;
+        block.calculateBlockHash();
+    }
+    console.log(`Valid block found: Block Hash: ${block.hash.toString('hex')}\nNonce: ${block.nonce}`);
+    // TODO: This should be sent to the submitBlock api endpoint
+    try {
+        await block.save();
+    } catch (err) {
+        console.error(err);
+        throw err;
+    }
+
+    db.close();
+    console.log('Block saved to mongo: ' + block);
+    process.exit();
+}
 
 program.version('0.0.1');
 
