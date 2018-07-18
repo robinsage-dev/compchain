@@ -1,5 +1,6 @@
 <div align="center">
 <img src="/docs/compchain.png" alt="Compchain" />
+<hr>
 Compchain is a blockchain that secures your downline, forever.
 </div>
 
