@@ -1,6 +1,6 @@
 # Compchain
 
-[Compchain](https://github.com/robinsage-dev/compchain/blob/master/docs/compchain.png)
+[Compchain](../blob/master/docs/compchain.png)
 
 ## Tasks
 ### Development

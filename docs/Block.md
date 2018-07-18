@@ -24,7 +24,7 @@ Alice wants to send Bob 10 coins using a previous input of 10 coins, for simplic
 | Bytes (hex) | `02071791bdeda4bcc43e3b0ed9c7be4a404c91b637d86d4f65a6b1720d6f13682e` | `02a5a6f3744db671d0a19970c49f31387a8c811e7da8a971d08b7927206d815100` | `f80b755a0b2a5ae930aa89f38c896ee6a8ce0a34c900aeac400104e6b06ef36e` | `01000000` | `f989e31f78f07a5efb246daa7ac4ba1b3534f5c17b50324ec15804428e469f72566a33ee1771b8c1574be350e9a8f0a11747ef94351cfd35bf1e3286406644c8` | `df535fd729927274a46143337976e262b47c9eaee7b201f8c5a0c46fde136eff`
 
 2. Calculate the merkle root
-![merkle tree](https://github.com/robinsage-dev/compchain/blob/master/docs/merkle_root.png)
+![merkle tree](../blob/master/docs/merkle_root.png)
 
     1. Get the first two transactions in the block (if there is only 1, then it is duplicated), and concatenate their hashes together, with the hash of the first transaction in the block first.
     `df535fd729927274a46143337976e262b47c9eaee7b201f8c5a0c46fde136effdf535fd729927274a46143337976e262b47c9eaee7b201f8c5a0c46fde136eff`
