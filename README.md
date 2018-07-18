@@ -1,6 +1,6 @@
 # Compchain
 
-[Compchain](../blob/master/docs/compchain.png)
+[Compchain](/docs/compchain.png)
 
 ## Tasks
 ### Development
