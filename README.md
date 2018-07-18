@@ -1,6 +1,5 @@
 <div align="center">
-![Compchain](/docs/compchain.png)
-
+<img src="/docs/compchain.png" alt="Compchain" />
 Compchain is a blockchain that secures your downline, forever.
 </div>
 
