@@ -1,6 +1,13 @@
-# Compchain
-
+<div align="center">
 ![Compchain](/docs/compchain.png)
+
+Compchain is a blockchain that secures your downline, forever.
+</div>
+
+## Docs
+* [Blocks](/docs/Block.md)
+* [Transactions](/docs/Transaction.md)
+* [Scripts](/docs/Script.md)
 
 ## Tasks
 ### Development
