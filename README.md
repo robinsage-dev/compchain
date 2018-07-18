@@ -1,6 +1,6 @@
 # Compchain
 
-[Compchain](/docs/compchain.png)
+![Compchain](/docs/compchain.png)
 
 ## Tasks
 ### Development
