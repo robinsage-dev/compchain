@@ -1,17 +1,26 @@
 # Transactions
 
+The standard transaction is a pay-to-script-hash, similar to bitcoin, where the script is hashed, and the spender must provide the script, and all inputs so the script equates to true when executed.
+
 ## Data structure
 Transactions are stored as mongodb objects, but converted to buffers for crypto operations.  The structure is as follows:
 
+### General Transaction
 | Field          |  Description                                                 |  Size (Bytes)  | 
 |----------------|--------------------------------------------------------------|----------------| 
-| senderPubKey   |  ECSDA Compressed public key of the original coin owner      |  33            | 
-| receiverPubKey |  ECSDA Compressed public key of the coin recipient           |  33            | 
-| sig            |  ECSDA digital signature of the hash of the transaction data |  64            | 
 | inputs         |  SHA256 hash of each transaction used as inputs              |  32 (ea)       | 
-| amount         |  32 bit unsigned integer amount of coins to send             |  4             | 
+| outputs        |  32 bit unsigned integer amount of coins to send             |  4             | 
 |                |                                                              |                |
 |                |  Minimum Total Size                                          |  166           |
+
+### Input
+| Field          |  Description                                                 |  Size (Bytes)  | 
+|----------------|--------------------------------------------------------------|----------------| 
+| prevOutputHash |  SHA256 hash of each transaction used as inputs              |  32 (ea)       | 
+| outputs        |  32 bit unsigned integer amount of coins to send             |  4             | 
+|                |                                                              |                |
+|                |  Minimum Total Size                                          |  166           |
+
 
 ### Transaction construction example
 Alice wants to send Bob 10 coins using a previous input of 10 coins, for simplicity. The transaction is created and stored as follows:
