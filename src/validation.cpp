@@ -1875,10 +1875,10 @@ bool CChainState::ConnectBlock(const CBlock& block, CValidationState& state, CBl
     // COMPCHAIN: Special case to allow genesis transaction to be spent
     if (block.GetHash() != chainparams.GetConsensus().hashGenesisBlock) {
         assert(pindex->pprev);
+        CBlockIndex *pindexBIP34height = pindex->pprev->GetAncestor(chainparams.GetConsensus().BIP34Height);
+        //Only continue to enforce if we're below BIP34 activation height or the block hash at that height doesn't correspond.
+        fEnforceBIP30 = fEnforceBIP30 && (!pindexBIP34height || !(pindexBIP34height->GetBlockHash() == chainparams.GetConsensus().BIP34Hash));
     }
-    CBlockIndex *pindexBIP34height = pindex->pprev->GetAncestor(chainparams.GetConsensus().BIP34Height);
-    //Only continue to enforce if we're below BIP34 activation height or the block hash at that height doesn't correspond.
-    fEnforceBIP30 = fEnforceBIP30 && (!pindexBIP34height || !(pindexBIP34height->GetBlockHash() == chainparams.GetConsensus().BIP34Hash));
 
     if (fEnforceBIP30) {
         for (const auto& tx : block.vtx) {
