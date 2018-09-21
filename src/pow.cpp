@@ -14,14 +14,21 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
 {
     assert(pindexLast != nullptr);
     unsigned int nProofOfWorkLimit = UintToArith256(params.powLimit).GetCompact();
+    arith_uint256 lastTarget;
 
+    // COMPCHAIN: Immediately adjust to min. difficulty (genesis block was mined with very low difficulty)
+    if (lastTarget.SetCompact(pindexLast->nBits) > UintToArith256(params.powLimit))
+    {
+                return nProofOfWorkLimit;
+    }
+    
     // Only change once per difficulty adjustment interval
     if ((pindexLast->nHeight+1) % params.DifficultyAdjustmentInterval() != 0)
     {
         if (params.fPowAllowMinDifficultyBlocks)
         {
             // Special difficulty rule for testnet:
-            // If the new block's timestamp is more than 2* 10 minutes
+            // If the new block's timestamp is more than 2* 3 minutes
             // then allow mining of a min-difficulty block.
             if (pblock->GetBlockTime() > pindexLast->GetBlockTime() + params.nPowTargetSpacing*2)
                 return nProofOfWorkLimit;
@@ -31,7 +38,14 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
                 const CBlockIndex* pindex = pindexLast;
                 while (pindex->pprev && pindex->nHeight % params.DifficultyAdjustmentInterval() != 0 && pindex->nBits == nProofOfWorkLimit)
                     pindex = pindex->pprev;
-                return pindex->nBits;
+                if (pindex->nHeight == 0) // COMPCHAIN: If genesis block, return PoW limit
+                {
+                    return nProofOfWorkLimit;
+                }
+                else
+                {
+                    return pindex->nBits;
+                }
             }
         }
         return pindexLast->nBits;
