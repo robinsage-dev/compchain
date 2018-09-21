@@ -1,0 +1,6 @@
+usr/local/bin/compchain-qt usr/bin
+share/pixmaps/compchain32.xpm usr/share/pixmaps
+share/pixmaps/compchain16.xpm usr/share/pixmaps
+share/pixmaps/compchain128.png usr/share/pixmaps
+debian/compchain-qt.desktop usr/share/applications
+debian/compchain-qt.protocol usr/share/kde4/services/

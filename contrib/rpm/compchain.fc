@@ -1,0 +1,8 @@
+/usr/bin/compchain-cli		--	gen_context(system_u:object_r:compchain_exec_t,s0)
+/usr/sbin/compchaind		--	gen_context(system_u:object_r:compchain_exec_t,s0)
+/usr/lib(64)?/compchain/compchaind		--	gen_context(system_u:object_r:compchain_exec_t,s0)
+
+/etc/compchain(/.*)?		gen_context(system_u:object_r:compchain_conf_t,s0)
+/var/lib/compchain(/.*)?		gen_context(system_u:object_r:compchain_var_lib_t,s0)
+
+(/var)?/run/compchaind(/.*)?   gen_context(system_u:object_r:compchain_var_run_t,s0)

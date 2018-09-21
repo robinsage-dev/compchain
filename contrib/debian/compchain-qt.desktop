@@ -1,0 +1,14 @@
+[Desktop Entry]
+Version=1.0
+Name=Compchain Core
+Comment=Connect to the Compchain P2P Network
+Comment[de]=Verbinde mit dem Compchain peer-to-peer Netzwerk
+Comment[fr]=Compchain, monnaie virtuelle cryptographique pair à pair
+Comment[tr]=Compchain, eşten eşe kriptografik sanal para birimi
+Exec=compchain-qt %u
+Terminal=false
+Type=Application
+Icon=compchain128
+MimeType=x-scheme-handler/compchain;
+Categories=Office;Finance;
+StartupWMClass=Compchain-qt
