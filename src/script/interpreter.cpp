@@ -492,7 +492,8 @@ bool EvalScript(std::vector<std::vector<unsigned char> >& stack, const CScript& 
 
                 case OP_RETURN:
                 {
-                    return set_error(serror, SCRIPT_ERR_OP_RETURN);
+                    // Compchain: Treat as nop
+                    break;
                 }
                 break;
 
