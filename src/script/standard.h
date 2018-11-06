@@ -8,6 +8,7 @@
 
 #include <script/interpreter.h>
 #include <uint256.h>
+#include <consensus/consensus.h>
 
 #include <boost/variant.hpp>
 
@@ -28,10 +29,10 @@ public:
 };
 
 /**
- * Default setting for nMaxDatacarrierBytes. 80 bytes of data, +1 for OP_RETURN,
- * +2 for the pushdata opcodes.
+ * Default setting for nMaxDatacarrierBytes. 1 entire block, assuming no witness
+ * data
  */
-static const unsigned int MAX_OP_RETURN_RELAY = 83;
+static const unsigned int MAX_OP_RETURN_RELAY = MAX_BLOCK_WEIGHT / 4;
 
 /**
  * A data carrying output is an unspendable output containing data. The script
