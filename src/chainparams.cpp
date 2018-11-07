@@ -75,9 +75,9 @@ public:
     CMainParams() {
         strNetworkID = "main";
         consensus.nSubsidyHalvingInterval = 630000;
-        consensus.BIP16Exception = uint256S();
+        consensus.BIP16Exception = uint256();
         consensus.BIP34Height = 0;
-        consensus.BIP34Hash = uint256S()
+        consensus.BIP34Hash = uint256();
         consensus.BIP65Height = 0;
         consensus.BIP66Height = 0;
         consensus.powLimit = uint256S("00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
@@ -171,9 +171,9 @@ public:
     CTestNetParams() {
         strNetworkID = "test";
         consensus.nSubsidyHalvingInterval = 630000;
-        consensus.BIP16Exception = uint256S();
+        consensus.BIP16Exception = uint256();
         consensus.BIP34Height = 0;
-        consensus.BIP34Hash = uint256S();
+        consensus.BIP34Hash = uint256();
         consensus.BIP65Height = 0;
         consensus.BIP66Height = 0;
         consensus.powLimit = uint256S("00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
