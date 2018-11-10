@@ -38,17 +38,17 @@ from the root of the repository.
 
 **Note**: You only need Berkeley DB if the wallet is enabled (see the section *Disable-Wallet mode* below).
 
-Build Bitcoin Core
+Build Compchain Core
 ------------------------
 
-1. Clone the Bitcoin Core source code and cd into `bitcoin`
+1. Clone the Compchain Core source code and cd into `compchain`
 
-        git clone https://github.com/bitcoin/bitcoin
-        cd bitcoin
+        git clone https://github.com/bitcoin/compchain
+        cd compchain
 
-2.  Build Bitcoin Core:
+2.  Build Compchain Core:
 
-    Configure and build the headless Bitcoin Core binaries as well as the GUI (if Qt is found).
+    Configure and build the headless Compchain Core binaries as well as the GUI (if Qt is found).
 
     You can disable the GUI build by passing `--without-gui` to configure.
 
@@ -67,30 +67,30 @@ Build Bitcoin Core
 Running
 -------
 
-Bitcoin Core is now available at `./src/bitcoind`
+Compchain Core is now available at `./src/compchaind`
 
 Before running, it's recommended that you create an RPC configuration file.
 
-    echo -e "rpcuser=bitcoinrpc\nrpcpassword=$(xxd -l 16 -p /dev/urandom)" > "/Users/${USER}/Library/Application Support/Bitcoin/bitcoin.conf"
+    echo -e "rpcuser=compchainrpc\nrpcpassword=$(xxd -l 16 -p /dev/urandom)" > "/Users/${USER}/Library/Application Support/Compchain/compchain.conf"
 
-    chmod 600 "/Users/${USER}/Library/Application Support/Bitcoin/bitcoin.conf"
+    chmod 600 "/Users/${USER}/Library/Application Support/Compchain/compchain.conf"
 
-The first time you run bitcoind, it will start downloading the blockchain. This process could take several hours.
+The first time you run compchaind, it will start downloading the blockchain. This process could take several hours.
 
 You can monitor the download process by looking at the debug.log file:
 
-    tail -f $HOME/Library/Application\ Support/Bitcoin/debug.log
+    tail -f $HOME/Library/Application\ Support/Compchain/debug.log
 
 Other commands:
 -------
 
-    ./src/bitcoind -daemon # Starts the bitcoin daemon.
-    ./src/bitcoin-cli --help # Outputs a list of command-line options.
-    ./src/bitcoin-cli help # Outputs a list of RPC commands when the daemon is running.
+    ./src/compchaind -daemon # Starts the compchain daemon.
+    ./src/compchain-cli --help # Outputs a list of command-line options.
+    ./src/compchain-cli help # Outputs a list of RPC commands when the daemon is running.
 
 Notes
 -----
 
 * Tested on OS X 10.10 Yosemite through macOS 10.13 High Sierra on 64-bit Intel processors only.
 
-* Building with downloaded Qt binaries is not officially supported. See the notes in [#7714](https://github.com/bitcoin/bitcoin/issues/7714)
+* Building with downloaded Qt binaries is not officially supported. See the notes in [#7714](https://github.com/bitcoin/compchain/issues/7714)

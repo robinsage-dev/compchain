@@ -1,0 +1,33 @@
+# /etc/conf.d/compchaind: config file for /etc/init.d/compchaind
+
+# Config file location
+#COMPCHAIND_CONFIGFILE="/etc/compchain/compchain.conf"
+
+# What directory to write pidfile to?  (created and owned by $COMPCHAIND_USER)
+#COMPCHAIND_PIDDIR="/var/run/compchaind"
+
+# What filename to give the pidfile
+#COMPCHAIND_PIDFILE="${COMPCHAIND_PIDDIR}/compchaind.pid"
+
+# Where to write compchaind data (be mindful that the blockchain is large)
+#COMPCHAIND_DATADIR="/var/lib/compchaind"
+
+# User and group to own compchaind process
+#COMPCHAIND_USER="compchain"
+#COMPCHAIND_GROUP="compchain"
+
+# Path to compchaind executable
+#COMPCHAIND_BIN="/usr/bin/compchaind"
+
+# Nice value to run compchaind under
+#COMPCHAIND_NICE=0
+
+# Additional options (avoid -conf and -datadir, use flags above)
+#COMPCHAIND_OPTS=""
+
+# The timeout in seconds OpenRC will wait for compchaind to terminate
+# after a SIGTERM has been raised.
+# Note that this will be mapped as argument to start-stop-daemon's
+# '--retry' option, which means you can specify a retry schedule
+# here. For more information see man 8 start-stop-daemon.
+COMPCHAIND_SIGTERM_TIMEOUT=60
