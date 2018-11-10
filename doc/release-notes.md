@@ -1,42 +1,43 @@
-Compchain Core version 0.17.0.1 is now available from:
+Compchain Core version 1.0.0.0 is now available from:
 
-  <https://compchaincore.org/bin/compchain-core-0.17.0.1/>
+  <https://github.com/robinsage-dev/compchain/releases/download/v1.0/v1.0.zip>
 
 This is a new major version release, including new features, various bugfixes
 and performance improvements, as well as updated translations.
 
 Please report bugs using the issue tracker at GitHub:
 
-  <https://github.com/bitcoin/compchain/issues>
+  <https://github.com/robinsage-dev/compchain/issues>
 
 To receive security and update notifications, please subscribe to:
 
-  <https://compchaincore.org/en/list/announcements/join/>
+  N/A
 
 Notable changes
 ===============
 
-An issue was solved with OSX dmg generation, affecting macOS 10.12 to 10.14,
-which could cause Finder to crash on install.
+This release allows 1 block's worth of OP_RETURN data and has custom
+parameters set for the Compchain blockchain, which are listed below.
 
-There are no significant changes for other operating systems.
-
-0.17.0.1 change log
+1.0.0.0 change log
 ===================
 
-### Build system
-- #14416 `eb2cc84` Fix OSX dmg issue (10.12 to 10.14) (jonasschnelli)
-
-### Documentation
-- #14509 `1b5af2c` [0.17] doc: use SegWit in getblocktemplate example (Sjors)
-
-Credits
-=======
-
-Thanks to everyone who directly contributed to this release:
-
-- Jonas Schnelli
-- Pieter Wuille
-- Sjors Provoost
-- Wladimir J. van der Laan
+- Set max tip age to 2 days
+- rename binaries, source files, and references
+- Mine genesis block
+- Increase max OP_RETURN data to 1 full block weight (1MB) standard
+- Clear checkpoint data
+- Add dns seeds
+- Activate past BIPs immediately
+- Set new address prefixes
+- Set ports
+- Set network magic bytes
+- Make genesis block spendable
+- Change subsidy halving interval to 630,000 blocks
+- Change retargeting interval consensus
+- change block time to 3 minutes
+- Change block reward to 15
+- Increase max standard op_return data size enhancement
+- Rename bitcoin => compchain
+- Reset diff after genesis enhancement
 
