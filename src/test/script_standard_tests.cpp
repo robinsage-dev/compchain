@@ -112,6 +112,30 @@ BOOST_AUTO_TEST_CASE(script_standard_Solver_success)
     BOOST_CHECK_EQUAL(solutions.size(), 1U);
     BOOST_CHECK(solutions[0] == ToByteVector(scriptHash));
 
+    // TX_CHECKOUTPUTS
+    s.clear();
+    {
+        CScript scriptPubKey1, scriptPubKey2;
+        
+        // Creates a script s:
+        // 00 03 187301 19 76a9141e00a290fee11cdd0cf6cefeda990e3c67fc20fc88ac 00 19 76a914a24341f6f3f599176f69516ddb141b4320ea870a88ac 52 b3
+
+        scriptPubKey1 << OP_DUP << OP_HASH160 << ToByteVector(pubkeys[1].GetID()) << OP_EQUALVERIFY << OP_CHECKSIG;
+        scriptPubKey2 << OP_DUP << OP_HASH160 << ToByteVector(pubkeys[2].GetID()) << OP_EQUALVERIFY << OP_CHECKSIG;
+        s << OP_0 <<
+            ToByteVector(scriptPubKey1) <<
+            95000<< ToByteVector(scriptPubKey2) <<
+            OP_2 << OP_CHECKOUTPUTS;
+        BOOST_CHECK(Solver(s, whichType, solutions));
+        BOOST_CHECK_EQUAL(whichType, TX_CHECKOUTPUTS);
+        BOOST_CHECK_EQUAL(solutions.size(), 5u);
+        BOOST_CHECK(solutions[0] == ToByteVector(scriptPubKey1));
+        BOOST_CHECK(solutions[1] == ToByteVector(scriptPubKey2));
+        BOOST_CHECK(solutions[2] == intToBytes(0));
+        BOOST_CHECK(solutions[3] == intToBytes(95000));
+        BOOST_CHECK(solutions[4] == std::vector<unsigned char>({2}));
+    }
+
     // TX_NONSTANDARD
     s.clear();
     s << OP_9 << OP_ADD << OP_11 << OP_EQUAL;

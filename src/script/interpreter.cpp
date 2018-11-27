@@ -457,7 +457,69 @@ bool EvalScript(std::vector<std::vector<unsigned char> >& stack, const CScript& 
                     break;
                 }
 
-                case OP_NOP1: case OP_NOP4: case OP_NOP5:
+                // TODO: make sure there is only one OP_CHECKOUTPUTS in each transaction
+                case OP_CHECKOUTPUTS:
+                {
+                    if (stack.size() < 5) // 4 b/c there must be at least 2 spc and 2 scriptPubKeyToCheck, and 1 signatureIndex
+                        return set_error(serror, SCRIPT_ERR_INVALID_STACK_OPERATION);
+
+                    // Iterate through each scriptPubKeyToCheck
+                    int nOutputCount = CScriptNum(stacktop(-1), fRequireMinimal).getint();
+                    popstack(stack);
+
+                    if (nOutputCount < 2 || nOutputCount > MAX_OUTPUTS_PER_CHECKOUTPUTS)
+                        return set_error(serror, SCRIPT_ERR_OUTPUT_COUNT);
+
+                    nOpCount += nOutputCount; // To match the pattern in OP_CHECKMULTISIG
+
+                    if ((nOpCount) > MAX_OPS_PER_SCRIPT) // +1 because of the additional index op at the beginning of the script
+                        return set_error(serror, SCRIPT_ERR_OP_COUNT);
+
+                    CAmount remainingMPct = 100000; // Start at 100%
+
+
+                    for (int i=0; i < nOutputCount; i++)
+                    { 
+                        const valtype& scriptPubKeyToCheckSerialized = stack.back();
+                        CScript scriptPubKeyToCheck(scriptPubKeyToCheckSerialized.begin(), scriptPubKeyToCheckSerialized.end());
+                        popstack(stack);
+
+                        // TODO: Should we require minimal encoding? See script.h L223 fRequireMinimal in CScriptNum constructor
+                        CAmount spc = CScriptNum(stacktop(-1), false).getint();
+                        popstack(stack);
+
+                        if (spc < 0 || spc >= 100000 || (spc == 0 && i != nOutputCount - 1)) // catch all can only exist as the first spc
+                            return set_error(serror, SCRIPT_ERR_MPCT);
+
+                        // Must have a nonzero spc (for the catch-all output)
+                        // TODO: Do we want to enforce the position of this catch-all ouput in the script? (current behavior)
+                        if (i == nOutputCount - 1 && spc != 0)
+                            // TODO: better error msg here?
+                            return set_error(serror, SCRIPT_ERR_MPCT);
+
+                        // This is the catch-all output and should be first
+                        if (spc == 0)
+                            spc = remainingMPct;
+
+                        // Make sure each scriptPubKeyToCheck exists in the tx output
+                        // and that the output value proportions are correct
+                        if (!checker.CheckOutput(spc, scriptPubKeyToCheck))
+                        {
+                            // TODO: This should probably push a 0 to the stack and return immediately
+                            return set_error(serror, SCRIPT_ERR_CHECKOUTPUTS);
+                        }
+
+                        remainingMPct -= spc;
+                    }
+
+                    stack.push_back(vchTrue);
+                    break;
+                }
+
+                    
+
+
+                case OP_NOP1: case OP_NOP5:
                 case OP_NOP6: case OP_NOP7: case OP_NOP8: case OP_NOP9: case OP_NOP10:
                 {
                     if (flags & SCRIPT_VERIFY_DISCOURAGE_UPGRADABLE_NOPS)
@@ -1410,6 +1472,30 @@ bool GenericTransactionSignatureChecker<T>::CheckSequence(const CScriptNum& nSeq
         return false;
 
     return true;
+}
+
+template <class T>
+bool GenericTransactionSignatureChecker<T>::CheckOutput(const CAmount spc, CScript& scriptPubKey) const
+{
+    // Check if scriptPubKey exists in any of the outputs
+    for (unsigned int i=0; i < txTo->vout.size(); i++)
+    {
+        CScript actualScriptPubKey(txTo->vout[i].scriptPubKey.begin(), txTo->vout[i].scriptPubKey.end());
+        if (scriptPubKey == actualScriptPubKey)
+        {
+
+            // Check that expected value = actual
+            double proportion = (double) spc / (double) 100000;
+            const CAmount expectedValue = proportion * (double) amount;
+            if (txTo->vout[i].nValue == expectedValue)
+            {
+                return true;
+            }
+        }
+    }
+
+    // Assume false unless a matching output is found
+    return false;
 }
 
 // explicit instantiation

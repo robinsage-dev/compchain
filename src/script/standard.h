@@ -66,6 +66,7 @@ enum txnouttype
     TX_WITNESS_V0_SCRIPTHASH,
     TX_WITNESS_V0_KEYHASH,
     TX_WITNESS_UNKNOWN, //!< Only for Witness versions not already defined above
+    TX_CHECKOUTPUTS,
 };
 
 class CNoDestination {
@@ -141,6 +142,11 @@ const char* GetTxnOutputType(txnouttype t);
  * @return                     True if script matches standard template
  */
 bool Solver(const CScript& scriptPubKey, txnouttype& typeRet, std::vector<std::vector<unsigned char> >& vSolutionsRet);
+
+/**
+ * Convert a 32 bit integer to a vector of bytes, used for solution checking.
+ */
+std::vector<unsigned char> intToBytes(unsigned int paramInt);
 
 /**
  * Parse a standard scriptPubKey for the destination address. Assigns result to

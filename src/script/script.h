@@ -28,6 +28,9 @@ static const int MAX_OPS_PER_SCRIPT = 201;
 // Maximum number of public keys per multisig
 static const int MAX_PUBKEYS_PER_MULTISIG = 20;
 
+// Maximum number of scriptPubkeys per op_checkoutputs
+static const int MAX_OUTPUTS_PER_CHECKOUTPUTS = 20;
+
 // Maximum script length in bytes
 static const int MAX_SCRIPT_SIZE = 10000;
 
@@ -173,7 +176,8 @@ enum opcodetype
     OP_NOP2 = OP_CHECKLOCKTIMEVERIFY,
     OP_CHECKSEQUENCEVERIFY = 0xb2,
     OP_NOP3 = OP_CHECKSEQUENCEVERIFY,
-    OP_NOP4 = 0xb3,
+    OP_CHECKOUTPUTS = 0xb3,
+    OP_NOP4 = OP_CHECKOUTPUTS,
     OP_NOP5 = 0xb4,
     OP_NOP6 = 0xb5,
     OP_NOP7 = 0xb6,

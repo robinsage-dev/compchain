@@ -1413,10 +1413,22 @@ bool CheckInputs(const CTransaction& tx, CValidationState &state, const CCoinsVi
                 return true;
             }
 
+            // To keep track of OP_CHECKOUTPUTS UTXO
+            int checkOutputsScripts = 0;
+
             for (unsigned int i = 0; i < tx.vin.size(); i++) {
                 const COutPoint &prevout = tx.vin[i].prevout;
                 const Coin& coin = inputs.AccessCoin(prevout);
                 assert(!coin.IsSpent());
+
+                // Make sure there exists no more than 1 OP_CHECKOUTPUTS scripts
+                // in the tx
+                if (std::find(coin.out.scriptPubKey.begin(), coin.out.scriptPubKey.end(), OP_CHECKOUTPUTS) != coin.out.scriptPubKey.end()) {
+                    checkOutputsScripts++;
+                    if (checkOutputsScripts > 1) {
+                        return state.Invalid(false, REJECT_NONSTANDARD, strprintf("multiple-check-outputs", "more than 1 input spends an OP_CHECKOUTPUTS script"));
+                    }
+                }
 
                 // We very carefully only pass in things to CScriptCheck which
                 // are clearly committed to by tx' witness hash. This provides
