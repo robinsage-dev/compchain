@@ -24,6 +24,14 @@ WitnessV0ScriptHash::WitnessV0ScriptHash(const CScript& in)
     CSHA256().Write(in.data(), in.size()).Finalize(begin());
 }
 
+std::vector<unsigned char> intToBytes(unsigned int paramInt)
+{
+     std::vector<unsigned char> arrayOfByte(4);
+     for (int i = 0; i < 4; i++)
+         arrayOfByte[3 - i] = (paramInt >> (i * 8));
+     return arrayOfByte;
+}
+
 const char* GetTxnOutputType(txnouttype t)
 {
     switch (t)
@@ -37,6 +45,7 @@ const char* GetTxnOutputType(txnouttype t)
     case TX_WITNESS_V0_KEYHASH: return "witness_v0_keyhash";
     case TX_WITNESS_V0_SCRIPTHASH: return "witness_v0_scripthash";
     case TX_WITNESS_UNKNOWN: return "witness_unknown";
+    case TX_CHECKOUTPUTS: return "check_outputs";
     }
     return nullptr;
 }
@@ -85,6 +94,83 @@ static bool MatchMultisig(const CScript& script, unsigned int& required, std::ve
     unsigned int keys = CScript::DecodeOP_N(opcode);
     if (pubkeys.size() != keys || keys < required) return false;
     return (it + 1 == script.end());
+}
+
+static bool MatchCheckOutputs(const CScript& script, std::vector<valtype>& scriptPubKeys, std::vector<valtype>& spcs, unsigned int& numberOutputs)
+{
+    opcodetype opcode;
+    valtype data;
+    CScript::const_iterator it = script.begin();
+    CScript::const_iterator itOutputs = script.end() - 2;
+
+    if (script.size() < 4 || script.back() != OP_CHECKOUTPUTS) return false;
+    if (!script.GetOp(itOutputs, opcode, data) || !IsSmallInteger(opcode)) return false;
+    numberOutputs = CScript::DecodeOP_N(opcode);
+    if (numberOutputs > MAX_OUTPUTS_PER_CHECKOUTPUTS) return false;
+
+    bool catchAllExists = false;
+    for (unsigned int i=0; i < numberOutputs; i++)
+    {
+        unsigned int spc;
+        // Get spc
+        if (!script.GetOp(it, opcode, data)) return false;
+        if (i == 0 && opcode != 0) return false; // There must be only a catch-all first
+        if (opcode != 0)
+        {
+            // TODO: There has to be a better way, this is ugly...
+            unsigned int blank = 0;
+            switch (opcode)
+            {
+                case 1:
+                    memcpy((char*)&spc+1, &blank, 3);
+                    memcpy((char*)&spc, &data[0], 1);
+                    break;
+                case 2:
+                    memcpy((char*)&spc+2, &blank, 2);
+                    memcpy((char*)&spc+1, &data[0], 1);
+                    memcpy((char*)&spc, &data[1], 1);
+                    break;
+                case 3:
+                    memcpy((char*)&spc+3, &blank, 1);
+                    memcpy((char*)&spc+2, &data[2], 1);
+                    memcpy((char*)&spc+1, &data[1], 1);
+                    memcpy((char*)&spc, &data[0], 1);
+                    break;
+                case 4:
+                    spc = ReadBE32(&data[0]);
+                    break;
+                default:
+                    break;
+            }
+        }
+        else
+        {
+            spc = 0;
+            catchAllExists = true;
+        }
+
+        // Validate spc
+        if (spc > 100000)
+        {
+            return false;
+        }
+        std::vector<unsigned char> spcChars = intToBytes(spc);
+        spcs.push_back(spcChars);
+
+        // Get scriptPubKey
+        if (!script.GetOp(it, opcode, data)) return false;
+
+        // Validate scriptPubKey?
+        //CScript scriptPubKey = CScript(data);
+        scriptPubKeys.emplace_back(std::move(data));
+
+    }
+    // Make sure we've check all of the script contents
+    if (!script.GetOp(it, opcode, data)) return false;
+    unsigned int numOutputsVerify = CScript::DecodeOP_N(opcode);
+    if (numOutputsVerify != numberOutputs) return false;
+
+    return catchAllExists;
 }
 
 bool Solver(const CScript& scriptPubKey, txnouttype& typeRet, std::vector<std::vector<unsigned char> >& vSolutionsRet)
@@ -154,6 +240,19 @@ bool Solver(const CScript& scriptPubKey, txnouttype& typeRet, std::vector<std::v
         vSolutionsRet.push_back({static_cast<unsigned char>(required)}); // safe as required is in range 1..16
         vSolutionsRet.insert(vSolutionsRet.end(), keys.begin(), keys.end());
         vSolutionsRet.push_back({static_cast<unsigned char>(keys.size())}); // safe as size is in range 1..16
+        return true;
+    }
+
+    unsigned int numberOutputs;
+    std::vector<std::vector<unsigned char>> scriptPubKeys;
+    std::vector<std::vector<unsigned char>> spcs;
+    if (MatchCheckOutputs(scriptPubKey, scriptPubKeys, spcs, numberOutputs))
+    {
+        typeRet = TX_CHECKOUTPUTS;
+
+        vSolutionsRet.insert(vSolutionsRet.end(), scriptPubKeys.begin(), scriptPubKeys.end());
+        vSolutionsRet.insert(vSolutionsRet.end(), spcs.begin(), spcs.end());
+        vSolutionsRet.push_back({static_cast<unsigned char>(numberOutputs)}); // safe as required is in range 1..16
         return true;
     }
 

@@ -23,6 +23,8 @@ const char* ScriptErrorString(const ScriptError serror)
             return "Script failed an OP_CHECKSIGVERIFY operation";
         case SCRIPT_ERR_NUMEQUALVERIFY:
             return "Script failed an OP_NUMEQUALVERIFY operation";
+        case SCRIPT_ERR_CHECKOUTPUTS:
+            return "Script failed an OP_CHECKOUTPUTS operation";
         case SCRIPT_ERR_SCRIPT_SIZE:
             return "Script is too big";
         case SCRIPT_ERR_PUSH_SIZE:
@@ -35,6 +37,10 @@ const char* ScriptErrorString(const ScriptError serror)
             return "Signature count negative or greater than pubkey count";
         case SCRIPT_ERR_PUBKEY_COUNT:
             return "Pubkey count negative or limit exceeded";
+        case SCRIPT_ERR_OUTPUT_COUNT:
+            return "Output count negative or limit exceeded";
+        case SCRIPT_ERR_MPCT:
+            return "spc negative or limit exceeded";
         case SCRIPT_ERR_BAD_OPCODE:
             return "Opcode missing or not understood";
         case SCRIPT_ERR_DISABLED_OPCODE:

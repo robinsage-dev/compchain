@@ -20,6 +20,8 @@ typedef enum ScriptError_t
     SCRIPT_ERR_STACK_SIZE,
     SCRIPT_ERR_SIG_COUNT,
     SCRIPT_ERR_PUBKEY_COUNT,
+    SCRIPT_ERR_OUTPUT_COUNT,
+    SCRIPT_ERR_MPCT,
 
     /* Failed verify operations */
     SCRIPT_ERR_VERIFY,
@@ -27,6 +29,7 @@ typedef enum ScriptError_t
     SCRIPT_ERR_CHECKMULTISIGVERIFY,
     SCRIPT_ERR_CHECKSIGVERIFY,
     SCRIPT_ERR_NUMEQUALVERIFY,
+    SCRIPT_ERR_CHECKOUTPUTS,
 
     /* Logical/Format/Canonical errors */
     SCRIPT_ERR_BAD_OPCODE,
