@@ -1423,10 +1423,11 @@ bool CheckInputs(const CTransaction& tx, CValidationState &state, const CCoinsVi
 
                 // Make sure there exists no more than 1 OP_CHECKOUTPUTS scripts
                 // in the tx
-                if (std::find(coin.out.scriptPubKey.begin(), coin.out.scriptPubKey.end(), OP_CHECKOUTPUTS) != coin.out.scriptPubKey.end()) {
+                if (coin.out.scriptPubKey.HasCheckOutputs())
+                {
                     checkOutputsScripts++;
                     if (checkOutputsScripts > 1) {
-                        return state.Invalid(false, REJECT_NONSTANDARD, strprintf("multiple-check-outputs", "more than 1 input spends an OP_CHECKOUTPUTS script"));
+                        return state.Invalid(false, REJECT_NONSTANDARD, "multiple-check-outputs");
                     }
                 }
 

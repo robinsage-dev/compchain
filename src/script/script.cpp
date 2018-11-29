@@ -203,6 +203,20 @@ bool CScript::IsPayToScriptHash() const
             (*this)[22] == OP_EQUAL);
 }
 
+bool CScript::HasCheckOutputs() const
+{
+    const_iterator pc = begin();
+    while (pc < end())
+    {
+        opcodetype opcode;
+        if (!GetOp(pc, opcode))
+            break; // the interpreter should fail anyway
+        if (opcode == OP_CHECKOUTPUTS)
+            return true;
+    }
+    return false;
+}
+
 bool CScript::IsPayToWitnessScriptHash() const
 {
     // Extra-fast test for pay-to-witness-script-hash CScripts:
