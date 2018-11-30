@@ -475,7 +475,7 @@ bool EvalScript(std::vector<std::vector<unsigned char> >& stack, const CScript& 
                     if ((nOpCount) > MAX_OPS_PER_SCRIPT) // +1 because of the additional index op at the beginning of the script
                         return set_error(serror, SCRIPT_ERR_OP_COUNT);
 
-                    CAmount remainingMPct = 100000; // Start at 100%
+                    CAmount remainingSpc = COIN; // Start at 100%
 
 
                     for (int i=0; i < nOutputCount; i++)
@@ -488,7 +488,7 @@ bool EvalScript(std::vector<std::vector<unsigned char> >& stack, const CScript& 
                         CAmount spc = CScriptNum(stacktop(-1), false).getint();
                         popstack(stack);
 
-                        if (spc < 0 || spc >= 100000 || (spc == 0 && i != nOutputCount - 1)) // catch all can only exist as the first spc
+                        if (spc < 0 || spc >= COIN || (spc == 0 && i != nOutputCount - 1)) // catch all can only exist as the first spc
                             return set_error(serror, SCRIPT_ERR_MPCT);
 
                         // Must have a nonzero spc (for the catch-all output)
@@ -499,7 +499,7 @@ bool EvalScript(std::vector<std::vector<unsigned char> >& stack, const CScript& 
 
                         // This is the catch-all output and should be first
                         if (spc == 0)
-                            spc = remainingMPct;
+                            spc = remainingSpc;
 
                         // Make sure each scriptPubKeyToCheck exists in the tx output
                         // and that the output value proportions are correct
@@ -509,7 +509,7 @@ bool EvalScript(std::vector<std::vector<unsigned char> >& stack, const CScript& 
                             return set_error(serror, SCRIPT_ERR_CHECKOUTPUTS);
                         }
 
-                        remainingMPct -= spc;
+                        remainingSpc -= spc;
                     }
 
                     stack.push_back(vchTrue);
@@ -1485,7 +1485,7 @@ bool GenericTransactionSignatureChecker<T>::CheckOutput(const CAmount spc, CScri
         {
 
             // Check that expected value = actual
-            double proportion = (double) spc / (double) 100000;
+            double proportion = (double) spc / (double) COIN;
             const CAmount expectedValue = proportion * (double) amount;
             if (txTo->vout[i].nValue == expectedValue)
             {

@@ -137,7 +137,7 @@ static bool MatchCheckOutputs(const CScript& script, std::vector<valtype>& scrip
                     memcpy((char*)&spc, &data[0], 1);
                     break;
                 case 4:
-                    spc = ReadBE32(&data[0]);
+                    spc = ReadLE32(&data[0]);
                     break;
                 default:
                     break;
@@ -150,7 +150,7 @@ static bool MatchCheckOutputs(const CScript& script, std::vector<valtype>& scrip
         }
 
         // Validate spc
-        if (spc > 100000)
+        if (spc > COIN)
         {
             return false;
         }
