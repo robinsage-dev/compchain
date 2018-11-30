@@ -124,7 +124,7 @@ BOOST_AUTO_TEST_CASE(script_standard_Solver_success)
         scriptPubKey2 << OP_DUP << OP_HASH160 << ToByteVector(pubkeys[2].GetID()) << OP_EQUALVERIFY << OP_CHECKSIG;
         s << OP_0 <<
             ToByteVector(scriptPubKey1) <<
-            95000<< ToByteVector(scriptPubKey2) <<
+            95000000<< ToByteVector(scriptPubKey2) <<
             OP_2 << OP_CHECKOUTPUTS;
         BOOST_CHECK(Solver(s, whichType, solutions));
         BOOST_CHECK_EQUAL(whichType, TX_CHECKOUTPUTS);
@@ -132,7 +132,7 @@ BOOST_AUTO_TEST_CASE(script_standard_Solver_success)
         BOOST_CHECK(solutions[0] == ToByteVector(scriptPubKey1));
         BOOST_CHECK(solutions[1] == ToByteVector(scriptPubKey2));
         BOOST_CHECK(solutions[2] == intToBytes(0));
-        BOOST_CHECK(solutions[3] == intToBytes(95000));
+        BOOST_CHECK(solutions[3] == intToBytes(95000000));
         BOOST_CHECK(solutions[4] == std::vector<unsigned char>({2}));
     }
 
