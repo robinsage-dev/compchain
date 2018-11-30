@@ -46,6 +46,7 @@ const char* GetTxnOutputType(txnouttype t)
     case TX_WITNESS_V0_SCRIPTHASH: return "witness_v0_scripthash";
     case TX_WITNESS_UNKNOWN: return "witness_unknown";
     case TX_CHECKOUTPUTS: return "check_outputs";
+    case TX_P2PKH_CHECKOUTPUTS: return "p2pkh_check_outputs";
     }
     return nullptr;
 }
@@ -173,6 +174,13 @@ static bool MatchCheckOutputs(const CScript& script, std::vector<valtype>& scrip
     return catchAllExists;
 }
 
+static bool MatchP2PKHCheckOutputs(const CScript& script, std::vector<valtype>& scriptPubKeys, std::vector<valtype>& spcs, unsigned int& numberOutputs, valtype& pubkeyhash)
+{
+    if (!MatchPayToPubkeyHash({script.begin(), script.begin() + 25}, pubkeyhash)) return false;
+    if (!MatchCheckOutputs({script.begin() + 25, script.end()}, scriptPubKeys, spcs, numberOutputs)) return false;
+    return true;
+}
+
 bool Solver(const CScript& scriptPubKey, txnouttype& typeRet, std::vector<std::vector<unsigned char> >& vSolutionsRet)
 {
     vSolutionsRet.clear();
@@ -255,6 +263,18 @@ bool Solver(const CScript& scriptPubKey, txnouttype& typeRet, std::vector<std::v
         vSolutionsRet.push_back({static_cast<unsigned char>(numberOutputs)}); // safe as required is in range 1..16
         return true;
     }
+
+    if (MatchP2PKHCheckOutputs(scriptPubKey, scriptPubKeys, spcs, numberOutputs, data))
+    {
+        typeRet = TX_P2PKH_CHECKOUTPUTS;
+
+        vSolutionsRet.insert(vSolutionsRet.end(), scriptPubKeys.begin(), scriptPubKeys.end());
+        vSolutionsRet.insert(vSolutionsRet.end(), spcs.begin(), spcs.end());
+        vSolutionsRet.push_back({static_cast<unsigned char>(numberOutputs)}); // safe as required is in range 1..16
+        vSolutionsRet.push_back(std::move(data));
+        return true;
+    }
+
 
     vSolutionsRet.clear();
     typeRet = TX_NONSTANDARD;
