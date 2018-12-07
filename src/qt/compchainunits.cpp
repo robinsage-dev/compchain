@@ -17,9 +17,9 @@ CompchainUnits::CompchainUnits(QObject *parent):
 QList<CompchainUnits::Unit> CompchainUnits::availableUnits()
 {
     QList<CompchainUnits::Unit> unitlist;
-    unitlist.append(BTC);
-    unitlist.append(mBTC);
-    unitlist.append(uBTC);
+    unitlist.append(COCO);
+    unitlist.append(mCOCO);
+    unitlist.append(uCOCO);
     unitlist.append(SAT);
     return unitlist;
 }
@@ -28,9 +28,9 @@ bool CompchainUnits::valid(int unit)
 {
     switch(unit)
     {
-    case BTC:
-    case mBTC:
-    case uBTC:
+    case COCO:
+    case mCOCO:
+    case uCOCO:
     case SAT:
         return true;
     default:
@@ -42,9 +42,9 @@ QString CompchainUnits::longName(int unit)
 {
     switch(unit)
     {
-    case BTC: return QString("BTC");
-    case mBTC: return QString("mBTC");
-    case uBTC: return QString::fromUtf8("µBTC (bits)");
+    case COCO: return QString("COCO");
+    case mCOCO: return QString("mCOCO");
+    case uCOCO: return QString::fromUtf8("µCOCO (bits)");
     case SAT: return QString("Satoshi (sat)");
     default: return QString("???");
     }
@@ -54,7 +54,7 @@ QString CompchainUnits::shortName(int unit)
 {
     switch(unit)
     {
-    case uBTC: return QString::fromUtf8("bits");
+    case uCOCO: return QString::fromUtf8("bits");
     case SAT: return QString("sat");
     default: return longName(unit);
     }
@@ -64,9 +64,9 @@ QString CompchainUnits::description(int unit)
 {
     switch(unit)
     {
-    case BTC: return QString("Compchains");
-    case mBTC: return QString("Milli-Compchains (1 / 1" THIN_SP_UTF8 "000)");
-    case uBTC: return QString("Micro-Compchains (bits) (1 / 1" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
+    case COCO: return QString("Compchains");
+    case mCOCO: return QString("Milli-Compchains (1 / 1" THIN_SP_UTF8 "000)");
+    case uCOCO: return QString("Micro-Compchains (bits) (1 / 1" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
     case SAT: return QString("Satoshi (sat) (1 / 100" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
     default: return QString("???");
     }
@@ -76,9 +76,9 @@ qint64 CompchainUnits::factor(int unit)
 {
     switch(unit)
     {
-    case BTC: return 100000000;
-    case mBTC: return 100000;
-    case uBTC: return 100;
+    case COCO: return 100000000;
+    case mCOCO: return 100000;
+    case uCOCO: return 100;
     case SAT: return 1;
     default: return 100000000;
     }
@@ -88,9 +88,9 @@ int CompchainUnits::decimals(int unit)
 {
     switch(unit)
     {
-    case BTC: return 8;
-    case mBTC: return 5;
-    case uBTC: return 2;
+    case COCO: return 8;
+    case mCOCO: return 5;
+    case uCOCO: return 2;
     case SAT: return 0;
     default: return 0;
     }
