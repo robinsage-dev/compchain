@@ -22,7 +22,7 @@ class RpcCreateMultiSigTest(CompchainTestFramework):
     def run_test(self):
         node0,node1,node2 = self.nodes
 
-        # 50 BTC each, rest will be 25 BTC each
+        # 50 COCO each, rest will be 25 COCO each
         node0.generate(149)
         self.sync_all()
 

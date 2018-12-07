@@ -60,7 +60,7 @@ Represents the view to a single wallet.
 
 * UI elements like CompchainAmountField, which inherit from QWidget.
 * `compchainstrings.cpp`: automatically generated
-* `compchainunits.(h/cpp)`: BTC / mBTC / etc handling
+* `compchainunits.(h/cpp)`: COCO / mCOCO / etc handling
 * `callback.h`
 * `guiconstants.h`: UI colors, app name, etc
 * `guiutil.h`: several helper functions

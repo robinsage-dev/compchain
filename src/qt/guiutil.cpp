@@ -157,7 +157,7 @@ bool parseCompchainURI(const QUrl &uri, SendCoinsRecipient *out)
         {
             if(!i->second.isEmpty())
             {
-                if(!CompchainUnits::parse(CompchainUnits::BTC, i->second, &rv.amount))
+                if(!CompchainUnits::parse(CompchainUnits::COCO, i->second, &rv.amount))
                 {
                     return false;
                 }
@@ -188,7 +188,7 @@ QString formatCompchainURI(const SendCoinsRecipient &info)
 
     if (info.amount)
     {
-        ret += QString("?amount=%1").arg(CompchainUnits::format(CompchainUnits::BTC, info.amount, false, CompchainUnits::separatorNever));
+        ret += QString("?amount=%1").arg(CompchainUnits::format(CompchainUnits::COCO, info.amount, false, CompchainUnits::separatorNever));
         paramCount++;
     }
 
