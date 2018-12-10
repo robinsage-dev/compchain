@@ -25,7 +25,7 @@ python27
 
 Download the source code:
 ```
-git clone https://github.com/bitcoin/compchain
+git clone https://github.com/robinsage-dev/compchain
 ```
 
 See [dependencies.md](dependencies.md) for a complete overview.

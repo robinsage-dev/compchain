@@ -2,7 +2,7 @@ Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: Compchain
 Upstream-Contact: Satoshi Nakamoto <satoshin@gmx.com>
  irc://#compchain@freenode.net
-Source: https://github.com/bitcoin/compchain
+Source: https://github.com/robinsage-dev/compchain
 
 Files: *
 Copyright: 2009-2018, Compchain Core Developers

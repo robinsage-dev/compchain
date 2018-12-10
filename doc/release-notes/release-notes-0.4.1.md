@@ -1,5 +1,5 @@
 Compchain version 0.4.1 is now available for download at:
-http://sourceforge.net/projects/compchain/files/Compchain/compchain-0.4.1/
+http://sourceforge.net/projects/bitcoin/files/Compchain/bitcoin-0.4.1/
 
 This is a bugfix only release based on 0.4.0.
 
@@ -11,28 +11,28 @@ The wallet encryption feature introduced in Compchain version 0.4.0 did not suff
 managed to get a copy of your encrypted wallet.dat file might be able to recover some or all of the unencrypted keys and steal the
 associated coins.
 
-If you have a previously encrypted wallet.dat, the first time you run wxcompchain or compchaind the wallet will be rewritten, Compchain will
+If you have a previously encrypted wallet.dat, the first time you run wxbitcoin or bitcoind the wallet will be rewritten, Compchain will
 shut down, and you will be prompted to restart it to run with the new, properly encrypted file.
 
 If you had a previously encrypted wallet.dat that might have been copied or stolen (for example, you backed it up to a public
-location) you should send all of your compchains to yourself using a new compchain address and stop using any previously generated addresses.
+location) you should send all of your bitcoins to yourself using a new bitcoin address and stop using any previously generated addresses.
 
 Wallets encrypted with this version of Compchain are written properly.
 
-Technical note: the encrypted wallet's 'keypool' will be regenerated the first time you request a new compchain address; to be certain that the
+Technical note: the encrypted wallet's 'keypool' will be regenerated the first time you request a new bitcoin address; to be certain that the
 new private keys are properly backed up you should:
 
 1. Run Compchain and let it rewrite the wallet.dat file
 
-2. Run it again, then ask it for a new compchain address.
+2. Run it again, then ask it for a new bitcoin address.
 wxCompchain: new address visible on main window
-compchaind: run the 'walletpassphrase' RPC command to unlock the wallet,  then run the 'getnewaddress' RPC command.
+bitcoind: run the 'walletpassphrase' RPC command to unlock the wallet,  then run the 'getnewaddress' RPC command.
 
-3. If your encrypted wallet.dat may have been copied or stolen, send all of your compchains to the new compchain address.
+3. If your encrypted wallet.dat may have been copied or stolen, send all of your bitcoins to the new bitcoin address.
 
 4. Shut down Compchain, then backup the wallet.dat file.
-IMPORTANT: be sure to request a new compchain address before backing up, so that the 'keypool' is regenerated and backed up.
+IMPORTANT: be sure to request a new bitcoin address before backing up, so that the 'keypool' is regenerated and backed up.
 
-"Security in depth" is always a good idea, so choosing a secure location for the backup and/or encrypting the backup before uploading it is recommended. And as in previous releases, if your machine is infected by malware there are several ways an attacker might steal your compchains.
+"Security in depth" is always a good idea, so choosing a secure location for the backup and/or encrypting the backup before uploading it is recommended. And as in previous releases, if your machine is infected by malware there are several ways an attacker might steal your bitcoins.
 
 Thanks to Alan Reiner (etotheipi) for finding and reporting this bug.
