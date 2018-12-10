@@ -28,7 +28,7 @@ packages:
 - "python-setuptools"
 - "fonts-tuffy"
 remotes:
-- "url": "https://github.com/bitcoin/compchain.git"
+- "url": "https://github.com/robinsage-dev/compchain.git"
   "dir": "compchain"
 files:
 - "MacOSX10.11.sdk.tar.gz"

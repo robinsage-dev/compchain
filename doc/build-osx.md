@@ -43,7 +43,7 @@ Build Compchain Core
 
 1. Clone the Compchain Core source code and cd into `compchain`
 
-        git clone https://github.com/bitcoin/compchain
+        git clone https://github.com/robinsage-dev/compchain
         cd compchain
 
 2.  Build Compchain Core:
@@ -93,4 +93,4 @@ Notes
 
 * Tested on OS X 10.10 Yosemite through macOS 10.13 High Sierra on 64-bit Intel processors only.
 
-* Building with downloaded Qt binaries is not officially supported. See the notes in [#7714](https://github.com/bitcoin/compchain/issues/7714)
+* Building with downloaded Qt binaries is not officially supported. See the notes in [#7714](https://github.com/bitcoin/bitcoin/issues/7714)

@@ -1,8 +1,8 @@
 <!-- This issue tracker is only for technical issues related to Compchain Core.
 
-General compchain questions and/or support requests are best directed to the Compchain StackExchange at https://compchain.stackexchange.com.
+General compchain questions and/or support requests are best directed to the Compchain StackExchange at https://bitcoin.stackexchange.com.
 
-For reporting security issues, please read instructions at https://compchaincore.org/en/contact/.
+For reporting security issues, please contact maintainers first and do not disclose the issue publicly until the maintainers release a patch.
 
 If the node is "stuck" during sync or giving "block checksum mismatch" errors, please ensure your hardware is stable by running memtest and observe CPU temperature with a load-test tool such as linpack before creating an issue! -->
 
