@@ -5,9 +5,9 @@ Upstream-Contact: Satoshi Nakamoto <satoshin@gmx.com>
 Source: https://github.com/robinsage-dev/compchain
 
 Files: *
-Copyright: 2009-2018, Compchain Core Developers
+Copyright: 2009-2018, Bitcoin Core Developers
 License: Expat
-Comment: The Compchain Core Developers encompasses the current developers listed on compchain.org,
+Comment: The Bitcoin Core Developers encompasses the current developers listed on bitcoin.org,
          as well as the numerous contributors to the project.
 
 Files: debian/*
